@@ -1,95 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&f[]=clash-display@500,600,700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
-
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Brand palette built around #fcf6f5 and #990011 */
+    --background: 8 50% 97%;            /* #fcf6f5 warm off-white */
+    --foreground: 350 15% 12%;          /* near-black with red undertone */
+
+    --surface: 8 40% 95%;               /* slight blush */
+    --surface-2: 8 30% 92%;
+    --ink: 350 20% 10%;                 /* deep ink */
+    --ink-soft: 350 15% 22%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card-foreground: 350 15% 12%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover-foreground: 350 15% 12%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 353 99% 30%;             /* #990011 */
+    --primary-foreground: 8 50% 97%;
+    --primary-deep: 353 99% 22%;        /* darker burgundy */
+    --primary-darker: 353 80% 14%;      /* near-black red for dark sections */
+    --primary-soft: 353 60% 92%;        /* dusty blush */
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 8 30% 90%;
+    --secondary-foreground: 350 15% 12%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 8 25% 88%;
+    --muted-foreground: 350 10% 38%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent: 353 99% 30%;
+    --accent-foreground: 8 50% 97%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 84% 50%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 350 20% 86%;
+    --border-strong: 350 25% 75%;
+    --input: 350 20% 86%;
+    --ring: 353 99% 30%;
 
-    --radius: 0.5rem;
+    --radius: 0.25rem;
+
+    /* Grid bg */
+    --grid-line: 353 30% 80%;
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
@@ -98,8 +65,86 @@ All colors MUST be HSL.
   * {
     @apply border-border;
   }
-
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-body antialiased;
+    font-feature-settings: "ss01", "ss02";
   }
+  ::selection {
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+}
+
+@layer components {
+  .font-display {
+    font-family: 'Clash Display', 'Inter', sans-serif;
+    letter-spacing: -0.04em;
+    line-height: 0.9;
+    font-weight: 600;
+  }
+  .font-body {
+    font-family: 'Satoshi', 'Inter', sans-serif;
+  }
+
+  /* Grid background pattern */
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, hsl(var(--grid-line) / 0.35) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--grid-line) / 0.35) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .bg-grid-dark {
+    background-image:
+      linear-gradient(to right, hsl(var(--background) / 0.06) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--background) / 0.06) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* Echo stack */
+  .echo-stack {
+    position: relative;
+    display: inline-block;
+  }
+  .echo-stack > .echo {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .echo-stack > .echo-1 { color: hsl(353 30% 78%); transform: translate(-0.04em, -0.04em); }
+  .echo-stack > .echo-2 { color: hsl(353 25% 84%); transform: translate(-0.08em, -0.08em); }
+  .echo-stack > .echo-3 { color: hsl(353 20% 88%); transform: translate(-0.12em, -0.12em); }
+  .echo-stack > .echo-4 { color: hsl(353 15% 92%); transform: translate(-0.16em, -0.16em); }
+  .echo-stack > .echo-top { position: relative; z-index: 1; }
+
+  /* Hand-drawn underline SVG path animation */
+  .hand-underline path {
+    stroke-dasharray: 600;
+    stroke-dashoffset: 600;
+    transition: stroke-dashoffset 1.4s cubic-bezier(0.77, 0, 0.175, 1);
+  }
+  .hand-underline.in-view path {
+    stroke-dashoffset: 0;
+  }
+
+  /* Reveal animations */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.9s cubic-bezier(0.22, 1, 0.36, 1), transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .reveal.in-view { opacity: 1; transform: translateY(0); }
+  .reveal-stagger > * { opacity: 0; transform: translateY(20px); transition: opacity 0.8s cubic-bezier(0.22,1,0.36,1), transform 0.8s cubic-bezier(0.22,1,0.36,1); }
+  .reveal-stagger.in-view > *:nth-child(1) { opacity:1; transform: translateY(0); transition-delay: 0ms; }
+  .reveal-stagger.in-view > *:nth-child(2) { opacity:1; transform: translateY(0); transition-delay: 100ms; }
+  .reveal-stagger.in-view > *:nth-child(3) { opacity:1; transform: translateY(0); transition-delay: 200ms; }
+  .reveal-stagger.in-view > *:nth-child(4) { opacity:1; transform: translateY(0); transition-delay: 300ms; }
+  .reveal-stagger.in-view > *:nth-child(5) { opacity:1; transform: translateY(0); transition-delay: 400ms; }
+
+  /* Mask reveal for headlines */
+  .mask-reveal {
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 1s cubic-bezier(0.77, 0, 0.175, 1);
+  }
+  .mask-reveal.in-view { clip-path: inset(0 0 0 0); }
 }

@@ -13,15 +13,27 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        display: ['Clash Display', 'Inter', 'sans-serif'],
+        body: ['Satoshi', 'Inter', 'sans-serif'],
+      },
       colors: {
         border: "hsl(var(--border))",
+        "border-strong": "hsl(var(--border-strong))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        surface: "hsl(var(--surface))",
+        "surface-2": "hsl(var(--surface-2))",
+        ink: "hsl(var(--ink))",
+        "ink-soft": "hsl(var(--ink-soft))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
           foreground: "hsl(var(--primary-foreground))",
+          deep: "hsl(var(--primary-deep))",
+          darker: "hsl(var(--primary-darker))",
+          soft: "hsl(var(--primary-soft))",
         },
         secondary: {
           DEFAULT: "hsl(var(--secondary))",
@@ -84,6 +96,7 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "pulse-soft": "pulse-soft 2.4s ease-in-out infinite",
       },
     },
   },
