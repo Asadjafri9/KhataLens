@@ -55,12 +55,12 @@ function Cubie({
   const offset = size / 2 + 0.006;
   const [x, y, z] = basePos;
 
-  // 3 burgundy faces (front, top, right) | 3 gray faces (back, bottom, left)
+  // 2 rich red opposite faces (front, back) | 4 gray faces (top, right, bottom, left)
   const faceFront = z > 0 ? COLORS.burgundy : null;
-  const faceTop = y > 0 ? COLORS.burgundyDeep : null;
-  const faceRight = x > 0 ? COLORS.burgundyMid : null;
+  const faceTop = y > 0 ? COLORS.gray : null;
+  const faceRight = x > 0 ? COLORS.grayLight : null;
 
-  const faceBack = z < 0 ? COLORS.gray : null;
+  const faceBack = z < 0 ? COLORS.burgundy : null;
   const faceBottom = y < 0 ? COLORS.grayDark : null;
   const faceLeft = x < 0 ? COLORS.grayLight : null;
 
@@ -99,6 +99,7 @@ function CubeModel({ scrollEl }: { scrollEl?: HTMLElement | null }) {
   const cubieRefs = useRef<(THREE.Group | null)[]>([]);
   const progressRef = useRef(0); // scroll 0..1
   const introDoneRef = useRef(false);
+  const spinRef = useRef(0);
 
   const cubies = useMemo(() => {
     const coords = [-0.56, 0, 0.56];
@@ -163,30 +164,40 @@ function CubeModel({ scrollEl }: { scrollEl?: HTMLElement | null }) {
     return () => st.kill();
   }, [scrollEl]);
 
-  // Apply scroll-driven offsets each frame (no idle motion after intro)
-  useFrame(() => {
+  // Blend idle motion and scroll-driven breakup so the cube stays alive.
+  useFrame((state, delta) => {
     if (!group.current || !introDoneRef.current) return;
+    const t = state.clock.getElapsedTime();
     const p = progressRef.current;
+    const idle = Math.max(0, 1 - p * 1.4);
 
-    // gentle gimbal tilt based on scroll only
-    group.current.rotation.x = 0.45 + p * 0.25;
-    group.current.rotation.y = 0.6 + p * 0.6;
-    group.current.rotation.z = p * 0.08;
+    spinRef.current += delta * (0.3 + idle * 0.18);
+    const targetX = 0.42 + Math.sin(t * 0.9) * 0.08 * idle + p * 0.24;
+    const targetY = 0.58 + spinRef.current + Math.sin(t * 0.35) * 0.04 * idle + p * 0.18;
+    const targetZ = Math.sin(t * 0.7) * 0.04 * idle + p * 0.08;
+
+    group.current.rotation.x = THREE.MathUtils.lerp(group.current.rotation.x, targetX, 0.08);
+    group.current.rotation.y = THREE.MathUtils.lerp(group.current.rotation.y, targetY, 0.08);
+    group.current.rotation.z = THREE.MathUtils.lerp(group.current.rotation.z, targetZ, 0.08);
+    group.current.position.y = Math.sin(t * 1.1) * 0.06 * idle;
 
     const groups = cubieRefs.current;
     for (let i = 0; i < groups.length; i++) {
       const g = groups[i];
       if (!g) continue;
       const base = cubies[i];
+      const phase = i * 0.45;
+      const swirl = Math.sin(t * 1.8 + phase) * 0.025 * idle;
+      const bob = Math.cos(t * 1.6 + phase) * 0.03 * idle;
       // explode outward along base vector, capped distance
       const k = 0.9 * p;
-      g.position.x = base[0] * (1 + k);
-      g.position.y = base[1] * (1 + k);
-      g.position.z = base[2] * (1 + k);
+      g.position.x = base[0] * (1 + k) + swirl * (base[2] || 1);
+      g.position.y = base[1] * (1 + k) + bob;
+      g.position.z = base[2] * (1 + k) + swirl * (base[0] || 1);
       // each cubie rotates a touch as it disassembles
-      g.rotation.x = base[0] * p * 1.2;
-      g.rotation.y = base[2] * p * 1.4;
-      g.rotation.z = base[1] * p * 0.8;
+      g.rotation.x = base[0] * p * 1.2 + Math.sin(t * 1.2 + phase) * 0.06 * idle;
+      g.rotation.y = base[2] * p * 1.4 + Math.cos(t * 1.3 + phase) * 0.06 * idle;
+      g.rotation.z = base[1] * p * 0.8 + Math.sin(t * 1.1 + phase) * 0.04 * idle;
     }
   });
 

@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Check, X, Zap, Layers, Sparkles, BarChart3, Users, Lock, Star } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { ScribbleUnderline } from "@/components/ScribbleUnderline";
-import { RevealText } from "@/components/RevealText";
 import { FlipCard } from "@/components/FlipCard";
 import BrandedRubiksCube from "@/components/BrandedRubiksCube";
 import { cn } from "@/lib/utils";
@@ -62,12 +61,12 @@ const Hero = () => {
     {/* Centered 3D cube — sits BEHIND the headline */}
     <div
       aria-hidden
-      className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-44 md:top-40 w-[420px] sm:w-[520px] md:w-[640px] lg:w-[760px] aspect-square z-0 opacity-70"
+      className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-16 md:top-12 w-[300px] sm:w-[380px] md:w-[480px] lg:w-[560px] aspect-square z-0 opacity-75"
     >
       <BrandedRubiksCube scrollTriggerEl={trigger} />
     </div>
-    {/* Soft veil to keep headline crisp over cube */}
-    <div className="pointer-events-none absolute inset-x-0 top-32 h-[55vh] bg-gradient-to-b from-background/60 via-background/20 to-background/0 z-[1]" />
+    {/* Background wash to keep the hero airy without covering the cube */}
+    <div className="pointer-events-none absolute inset-x-0 top-32 h-[55vh] bg-gradient-to-b from-background/45 via-background/15 to-background/0 z-[-1]" />
     <div className="container relative z-10">
 
       <Reveal className="flex justify-center">
@@ -77,16 +76,13 @@ const Hero = () => {
         </span>
       </Reveal>
 
-      <Reveal className="mt-8 text-center" stagger>
-        <h1 className="font-display text-ink text-[14vw] sm:text-7xl md:text-8xl lg:text-[9rem] leading-[0.9]">
+      <div className="mt-8 text-center">
+        <h1 className="font-display text-ink text-[12vw] sm:text-6xl md:text-7xl lg:text-[8rem] leading-[0.95] tracking-[-0.02em]">
           <span className="block">SHIP WORK,</span>
-          <span className="block">NOT <span className="echo-stack">
-            <span className="echo echo-4">MEETINGS</span>
-            <span className="echo echo-3">MEETINGS</span>
-            <span className="echo echo-2">MEETINGS</span>
-            <span className="echo echo-1">MEETINGS</span>
-            <span className="echo-top text-primary">MEETINGS</span>
-          </span>.</span>
+          <span className="block mt-1">
+            <ScribbleUnderline>NOT</ScribbleUnderline>{" "}
+            <span className="text-primary">MEETINGS</span>.
+          </span>
         </h1>
         <p className="mt-8 mx-auto max-w-xl text-lg text-ink-soft font-medium">
           Flux is the operating system for product teams who want to move{" "}
@@ -106,7 +102,7 @@ const Hero = () => {
           </button>
         </form>
         <p className="mt-4 text-xs text-ink-soft">No spam. Free during beta. Cancel anytime.</p>
-      </Reveal>
+      </div>
 
       {/* Mockup */}
       <Reveal className="mt-20">
