@@ -438,21 +438,31 @@ const Testimonials = () => {
           <h2 className="mt-4 font-display text-5xl md:text-7xl uppercase text-ink">Real teams.<br/>Real momentum.</h2>
         </Reveal>
         <div className="mt-16 grid md:grid-cols-3 gap-5">
-          {items.map((t,i) => (
-            <Reveal key={i} className={`p-8 border ${t.dark ? 'bg-primary-darker text-background border-primary-darker md:translate-y-4' : 'bg-card border-border'}`}>
-              <div className="flex gap-1">
-                {[...Array(5)].map((_,k)=>(<Star key={k} className="size-5 fill-primary text-primary" />))}
-              </div>
-              <p className={`mt-6 text-lg font-medium leading-snug ${t.dark ? 'text-background' : 'text-ink'}`}>"{t.q}"</p>
-              <div className="mt-8 flex items-center gap-3">
-                <div className={`size-12 rounded-full grid place-items-center font-display uppercase ${t.dark ? 'bg-background text-ink' : 'bg-ink text-background'}`}>{t.n.split(' ').map(p=>p[0]).join('')}</div>
-                <div>
-                  <div className="font-display uppercase text-sm">{t.n}</div>
-                  <div className={`text-xs ${t.dark ? 'text-background/60' : 'text-ink-soft'}`}>{t.r}</div>
+          {items.map((t, i) => {
+            const initials = t.n.split(' ').map(p => p[0]).join('');
+            return (
+              <Reveal key={i} className={`group/t [perspective:1200px] min-h-[320px] ${t.dark ? 'md:translate-y-4' : ''}`}>
+                <div className="relative h-full w-full transition-transform duration-700 [transform-style:preserve-3d] [transition-timing-function:cubic-bezier(0.61,0.98,0.48,1.01)] group-hover/t:[transform:rotate(180deg)_rotateX(180deg)]">
+                  {/* Front */}
+                  <div className={`absolute inset-0 [backface-visibility:hidden] border p-8 flex flex-col shadow-sm ${t.dark ? 'bg-primary-darker text-background border-primary-darker' : 'bg-card text-ink border-border'}`}>
+                    <div className="flex gap-1">
+                      {[...Array(5)].map((_, k) => (<Star key={k} className="size-5 fill-primary text-primary" />))}
+                    </div>
+                    <p className={`mt-6 text-lg font-medium leading-snug ${t.dark ? 'text-background' : 'text-ink'}`}>"{t.q}"</p>
+                    <div className={`mt-auto pt-6 text-[10px] uppercase tracking-[0.25em] ${t.dark ? 'text-background/50' : 'text-ink-soft/70'}`}>Hover to meet them →</div>
+                  </div>
+                  {/* Back */}
+                  <div className={`absolute inset-0 [transform:rotateY(180deg)] [backface-visibility:hidden] border p-8 flex flex-col items-center justify-center text-center shadow-xl shadow-primary/20 ${t.dark ? 'bg-background text-ink border-border' : 'bg-primary text-primary-foreground border-primary'}`}>
+                    <div className={`size-20 rounded-full grid place-items-center font-display text-2xl uppercase mb-5 ${t.dark ? 'bg-primary text-primary-foreground' : 'bg-background text-ink'}`}>{initials}</div>
+                    <div className="font-display uppercase text-2xl">{t.n}</div>
+                    <div className={`mt-2 text-sm ${t.dark ? 'text-ink-soft' : 'text-primary-foreground/80'}`}>{t.r}</div>
+                    <div className={`mt-5 h-px w-12 ${t.dark ? 'bg-primary' : 'bg-primary-foreground/40'}`} />
+                    <div className={`mt-5 text-[11px] uppercase tracking-[0.25em] font-bold ${t.dark ? 'text-primary' : 'text-primary-foreground/80'}`}>Verified customer</div>
+                  </div>
                 </div>
-              </div>
-            </Reveal>
-          ))}
+              </Reveal>
+            );
+          })}
         </div>
       </div>
     </section>
