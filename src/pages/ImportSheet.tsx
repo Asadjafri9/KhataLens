@@ -19,34 +19,26 @@ export default function ImportSheet() {
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) {
-      console.log("No file selected or user not logged in");
+    if (!file) {
+      console.log("No file selected");
+      return;
+    }
+    
+    if (!user) {
+      console.error("User not logged in!");
+      toast.error("Please log in to upload images");
       return;
     }
     
     console.log("File selected:", file.name);
+    console.log("User ID:", user.id);
     setSelectedFile(file);
     setIsExtracting(true);
     setRows([]);
     setExtractedDate(null);
     
     try {
-      console.log("Getting shopkeeper ID...");
-      // Get the correct shopkeeper ID
-      const { data: sk, error: skError } = await supabase
-        .from("shopkeepers")
-        .select("id")
-        .eq("auth_id", user.id)
-        .single();
-        
-      if (skError || !sk) {
-        console.error("Shopkeeper error:", skError);
-        throw new Error("Shopkeeper profile not found");
-      }
-      
-      console.log("Shopkeeper ID:", sk.id);
-
-      // Send image to Python FastAPI
+      // Send image to Python FastAPI directly without shopkeeper check
       const formData = new FormData();
       formData.append("file", file);
       
@@ -78,25 +70,10 @@ export default function ImportSheet() {
       console.log("Extracted data:", data);
       
       setExtractedDate(data.date);
-      
-      // Fetch all existing customers for this shopkeeper to try matching
-      const { data: customers } = await supabase
-        .from("customers")
-        .select("id, name, phone")
-        .eq("shopkeeper_id", sk.id);
         
       const processedRows = data.entries.map((entry: any, index: number) => {
         let phone = entry.phone;
         let status = phone ? "Ready" : "Needs Phone";
-        
-        // Auto-match if phone is missing
-        if (!phone && customers) {
-          const match = customers.find(c => c.name.toLowerCase().trim() === entry.name.toLowerCase().trim());
-          if (match && match.phone) {
-            phone = match.phone;
-            status = "Matched from DB";
-          }
-        }
         
         return {
           id: index.toString(),
@@ -112,6 +89,7 @@ export default function ImportSheet() {
       toast.success("Khata page extracted successfully!");
     } catch (error: any) {
       console.error("Full error:", error);
+      console.error("Error stack:", error.stack);
       if (error.name === 'AbortError') {
         toast.error("Request timed out. The image might be too large or the server is slow.");
       } else if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {

@@ -5,6 +5,7 @@ import uvicorn
 from pathlib import Path
 import tempfile
 import os
+import uuid
 from khata_ocr import build_llm, extract_khata
 from dotenv import load_dotenv
 
@@ -37,7 +38,7 @@ async def health():
     return {"status": "healthy"}
 
 @app.post("/api/extract")
-async def extract_api(file: UploadFile = File(...)):
+def extract_api(file: UploadFile = File(...)):
     print(f"[API] Received file: {file.filename}")
     if not file.filename:
         raise HTTPException(status_code=400, detail="No file uploaded")
@@ -45,11 +46,12 @@ async def extract_api(file: UploadFile = File(...)):
     # Save the uploaded file temporarily
     temp_dir = Path(tempfile.gettempdir()) / "khatalens"
     temp_dir.mkdir(exist_ok=True)
-    temp_path = temp_dir / file.filename
+    unique_filename = f"{uuid.uuid4().hex}_{file.filename}"
+    temp_path = temp_dir / unique_filename
     
     try:
         print(f"[API] Saving file to: {temp_path}")
-        content = await file.read()
+        content = file.file.read()
         with open(temp_path, "wb") as f:
             f.write(content)
         
@@ -67,8 +69,11 @@ async def extract_api(file: UploadFile = File(...)):
     finally:
         # Clean up
         if temp_path.exists():
-            temp_path.unlink()
-            print(f"[API] Cleaned up temp file")
+            try:
+                temp_path.unlink()
+                print(f"[API] Cleaned up temp file")
+            except Exception as e:
+                print(f"[API] Could not clean up temp file: {e}")
 
 if __name__ == "__main__":
     uvicorn.run("api:app", host="0.0.0.0", port=8000, reload=True)
