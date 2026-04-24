@@ -72,7 +72,7 @@ const Hero = () => (
         </h1>
         <p className="mt-8 mx-auto max-w-xl text-lg text-ink-soft font-medium">
           Flux is the operating system for product teams who want to move{" "}
-          <HandUnderline>fast</HandUnderline> without the chaos. Plan, build, and ship in one sharp workspace.
+          <ScribbleUnderline>fast</ScribbleUnderline> without the chaos. Plan, build, and ship in one sharp workspace.
         </p>
         <form className="mt-10 mx-auto max-w-xl flex flex-col sm:flex-row gap-3">
           <input
@@ -236,7 +236,7 @@ const Bento = () => (
       <Reveal className="max-w-3xl">
         <div className="text-[11px] uppercase tracking-[0.25em] text-primary font-bold">Features</div>
         <h2 className="mt-4 font-display text-5xl md:text-7xl uppercase text-ink">
-          Built for teams<br/>who actually <HandUnderline>ship</HandUnderline>.
+          Built for teams<br/>who actually <ScribbleUnderline>ship</ScribbleUnderline>.
         </h2>
       </Reveal>
 
