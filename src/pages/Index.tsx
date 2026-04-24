@@ -65,8 +65,8 @@ const Hero = () => {
     >
       <BrandedRubiksCube scrollTriggerEl={trigger} />
     </div>
-    {/* Background wash to keep the hero airy without covering the cube */}
-    <div className="pointer-events-none absolute inset-x-0 top-32 h-[55vh] bg-gradient-to-b from-background/45 via-background/15 to-background/0 z-[-1]" />
+    {/* Transparent veil in front of cube for text readability */}
+    <div className="pointer-events-none absolute inset-x-0 top-16 h-[62vh] bg-gradient-to-b from-background/60 via-background/20 to-background/0 z-[1]" />
     <div className="container relative z-10">
 
       <Reveal className="flex justify-center">
