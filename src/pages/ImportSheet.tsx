@@ -3,14 +3,11 @@ import { CheckCircle2, Upload, ArrowRight, Sparkles, Loader2, AlertCircle } from
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { DashboardShell } from "@/components/DashboardShell";
-import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/contexts/AuthContext";
 
 export default function ImportSheet() {
-  const { user } = useAuth();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [uploadKey, setUploadKey] = useState(0); // Add key to force re-render
+  const [uploadKey, setUploadKey] = useState(0);
   
   const [isExtracting, setIsExtracting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -19,142 +16,50 @@ export default function ImportSheet() {
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) {
-      console.log("No file selected");
-      return;
-    }
+    if (!file) return;
     
-    if (!user) {
-      console.error("User not logged in!");
-      toast.error("Please log in to upload images");
-      return;
-    }
-    
-    console.log("File selected:", file.name);
-    console.log("User ID:", user.id);
     setSelectedFile(file);
     setIsExtracting(true);
     setRows([]);
     setExtractedDate(null);
     
     try {
-      // Get shopkeeper ID first
-      console.log("Getting shopkeeper ID...");
-      const { data: sk, error: skError } = await supabase
-        .from("shopkeepers")
-        .select("id")
-        .eq("auth_id", user.id)
-        .single();
-        
-      if (skError || !sk) {
-        console.error("Shopkeeper error:", skError);
-        throw new Error("Shopkeeper profile not found. Please complete your profile first.");
-      }
-      
-      console.log("Shopkeeper ID:", sk.id);
-      
-      // Fetch all existing customers for matching
-      const { data: existingCustomers } = await supabase
-        .from("customers")
-        .select("id, name, phone, balance")
-        .eq("shopkeeper_id", sk.id);
-      
-      console.log("Existing customers:", existingCustomers);
-      
-      // Send image to Python FastAPI
+      // Send image to Python FastAPI for OCR
       const formData = new FormData();
       formData.append("file", file);
-      
-      console.log("Sending request to backend at http://localhost:8000/api/extract");
-      
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => {
-        console.log("Request timeout!");
-        controller.abort();
-      }, 60000); // 60 second timeout
       
       const res = await fetch("http://localhost:8000/api/extract", {
         method: "POST",
         body: formData,
-        signal: controller.signal,
       });
-      
-      clearTimeout(timeoutId);
-      
-      console.log("Response received! Status:", res.status);
       
       if (!res.ok) {
         const errorText = await res.text();
-        console.error("API Error Response:", errorText);
-        throw new Error(`Failed to extract data from API: ${errorText}`);
+        throw new Error(`Failed to extract data: ${errorText}`);
       }
       
       const data = await res.json();
-      console.log("Extracted data:", data);
-      
       setExtractedDate(data.date);
         
       const processedRows = data.entries.map((entry: any, index: number) => {
-        let phone = entry.phone;
-        let status = "Ready";
-        let matchedCustomerId = null;
-        
-        // If phone is missing, try to match by exact name
-        if (!phone && existingCustomers) {
-          const match = existingCustomers.find(c => 
-            c.name.toLowerCase().trim() === entry.name.toLowerCase().trim()
-          );
-          if (match && match.phone) {
-            phone = match.phone;
-            matchedCustomerId = match.id;
-            status = "Auto-matched from records";
-          } else {
-            status = "Phone required";
-          }
-        } else if (phone && existingCustomers) {
-          // Check if this phone already exists
-          const match = existingCustomers.find(c => c.phone === phone);
-          if (match) {
-            matchedCustomerId = match.id;
-            status = "Existing customer";
-          }
-        }
-        
         return {
           id: index.toString(),
           name: entry.name,
           amount: entry.amount,
-          phone: phone || "",
-          status: status,
-          matchedCustomerId: matchedCustomerId,
-          originalPhone: entry.phone || "" // Track original extracted phone
+          phone: entry.phone || "",
+          status: entry.phone ? "Ready" : "Phone required",
+          originalPhone: entry.phone || ""
         };
       });
       
       setRows(processedRows);
-      console.log("Processed rows:", processedRows);
       toast.success("Khata page extracted successfully!");
     } catch (error: any) {
-      console.error("Full error:", error);
-      console.error("Error stack:", error.stack);
-      if (error.name === 'AbortError') {
-        toast.error("Request timed out. The image might be too large or the server is slow.");
-      } else if (error.message?.includes('Failed to fetch') || error.message?.includes('NetworkError')) {
-        toast.error("Cannot connect to backend. Make sure FastAPI server is running on port 8000.");
-      } else {
-        toast.error(error.message || "Error processing image. Check console for details.");
-      }
-      setRows([]);
-      setExtractedDate(null);
+      console.error("Extraction error:", error);
+      toast.error(error.message || "Error processing image.");
     } finally {
       setIsExtracting(false);
       setSelectedFile(null);
-      // Reset the file input and force re-render
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
-      setUploadKey(prev => prev + 1);
-      console.log("Upload process completed");
     }
   };
 
@@ -165,19 +70,7 @@ export default function ImportSheet() {
   const handlePhoneChange = (id: string, newPhone: string) => {
     setRows(rows.map(r => {
       if (r.id === id) {
-        const phoneChanged = newPhone.trim() !== r.originalPhone;
-        let newStatus = "Ready";
-        
-        if (!newPhone.trim()) {
-          newStatus = "Phone required";
-        } else if (phoneChanged) {
-          newStatus = "Modified - will create new entry";
-        } else if (r.status === "Auto-matched from records") {
-          newStatus = "Auto-matched from records";
-        } else if (r.status === "Existing customer") {
-          newStatus = "Existing customer";
-        }
-        
+        let newStatus = newPhone.trim() ? "Ready" : "Phone required";
         return { ...r, phone: newPhone, status: newStatus };
       }
       return r;
@@ -185,10 +78,8 @@ export default function ImportSheet() {
   };
 
   const handleConfirmImport = async () => {
-    if (!user) return;
     if (rows.length === 0) return toast.error("No data to import");
     
-    // Validate missing phones
     if (rows.some(r => !r.phone.trim())) {
       return toast.error("Please fill in all missing phone numbers before importing");
     }
@@ -196,88 +87,24 @@ export default function ImportSheet() {
     setIsImporting(true);
     
     try {
-      const { data: sk } = await supabase
-        .from("shopkeepers")
-        .select("id")
-        .eq("auth_id", user.id)
-        .single();
-        
-      if (!sk) throw new Error("Shopkeeper not found");
+      const res = await fetch("http://localhost:8000/api/import", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          entries: rows,
+          date: extractedDate
+        })
+      });
 
-      let successfulCount = 0;
-      
-      for (const row of rows) {
-        // If phone is edited, it acts as a "brand new" customer if it doesn't exist
-        const { data: existingCustomer } = await supabase
-          .from("customers")
-          .select("id, balance")
-          .eq("shopkeeper_id", sk.id)
-          .eq("name", row.name)
-          .eq("phone", row.phone)
-          .maybeSingle();
-          
-        let customerId;
-        let newBalance = Number(row.amount);
-        
-        if (existingCustomer) {
-          customerId = existingCustomer.id;
-          newBalance = Number(existingCustomer.balance || 0) + Number(row.amount);
-          
-          await supabase
-            .from("customers")
-            .update({ balance: newBalance })
-            .eq("id", customerId);
-        } else {
-          // Brand new customer
-          const { data: newCustomer, error: insertError } = await supabase
-            .from("customers")
-            .insert({
-              shopkeeper_id: sk.id,
-              name: row.name,
-              phone: row.phone,
-              balance: newBalance
-            })
-            .select("id")
-            .single();
-            
-          if (insertError) throw insertError;
-          customerId = newCustomer.id;
-        }
-        
-        // Parse date properly if possible
-        let txDate = new Date().toISOString();
-        if (extractedDate) {
-          // Replace common slashes/dots so JS Date parses it slightly better
-          // Usually DD/MM/YY needs custom parsing, but we'll let JS try. 
-          // If Invalid, it falls back to now.
-          const parsed = new Date(extractedDate.replace(/\./g, "/"));
-          if (!isNaN(parsed.getTime())) {
-            txDate = parsed.toISOString();
-          }
-        }
-        
-        const { error: txError } = await supabase
-          .from("transactions")
-          .insert({
-            customer_id: customerId,
-            shopkeeper_id: sk.id,
-            type: "credit", // giving udhaar
-            amount: row.amount,
-            description: "Imported via KhataLens OCR",
-            date: txDate
-          });
-          
-        if (txError) throw txError;
-        successfulCount++;
-      }
-      
-      toast.success(`Successfully imported ${successfulCount} entries!`);
+      if (!res.ok) throw new Error("Failed to save to local database");
+
+      const result = await res.json();
+      toast.success(`Successfully imported ${result.imported} entries to local storage!`);
       setRows([]);
-      setSelectedFile(null);
       setExtractedDate(null);
     } catch (error) {
       console.error(error);
-      toast.error("Error saving data to database");
+      toast.error("Error saving data to local database");
     } finally {
       setIsImporting(false);
     }
@@ -373,12 +200,10 @@ export default function ImportSheet() {
                         />
                       </div>
                       <div className="sm:text-right flex items-center justify-end gap-1.5">
-                        {row.status === "Needs Phone" && <AlertCircle className="size-4 text-red-500" />}
-                        {row.status.includes("Matched") && <Sparkles className="size-4 text-primary" />}
+                        {row.status === "Phone required" && <AlertCircle className="size-4 text-red-500" />}
                         {row.status === "Ready" && <CheckCircle2 className="size-4 text-green-600" />}
                         <span className={
-                          row.status === "Needs Phone" ? "text-red-500 font-semibold" : 
-                          row.status.includes("Matched") ? "text-primary font-semibold text-xs" : "text-green-600 font-semibold"
+                          row.status === "Phone required" ? "text-red-500 font-semibold" : "text-green-600 font-semibold"
                         }>
                           {row.status}
                         </span>
@@ -402,7 +227,7 @@ export default function ImportSheet() {
                     className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-primary px-6 text-sm font-semibold text-primary-foreground hover:bg-primary-deep disabled:opacity-50 whitespace-nowrap"
                   >
                     {isImporting ? <Loader2 className="size-4 animate-spin" /> : null}
-                    Confirm & Save
+                    Confirm & Save to Local
                     <ArrowRight className="size-4" />
                   </button>
                 </div>
@@ -413,4 +238,4 @@ export default function ImportSheet() {
       </div>
     </DashboardShell>
   );
-}
+}

@@ -2,8 +2,6 @@ import { useState, useEffect } from "react";
 import { ArrowRight, ChevronDown, ChevronUp, Clock, Phone, Search, TrendingUp, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { DashboardShell } from "@/components/DashboardShell";
-import { supabase } from "@/lib/supabase";
-import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 interface Customer {
@@ -23,87 +21,61 @@ interface Transaction {
 }
 
 export default function Customer() {
-  const { user } = useAuth();
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [stats, setStats] = useState({ totalBalance: 0, activeCustomers: 0 });
   const [expandedCustomerId, setExpandedCustomerId] = useState<string | null>(null);
   const [customerTransactions, setCustomerTransactions] = useState<Record<string, Transaction[]>>({});
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    if (user) {
-      fetchCustomers();
+    fetchCustomers();
+    fetchStats();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      const res = await fetch("http://localhost:8000/api/stats");
+      if (res.ok) {
+        const data = await res.json();
+        setStats(data);
+      }
+    } catch (err) {
+      console.error("Stats fetch error:", err);
     }
-  }, [user]);
+  };
 
   const fetchCustomers = async () => {
     try {
       setLoading(true);
+      const res = await fetch("http://localhost:8000/api/customers");
+      if (!res.ok) throw new Error("Failed to fetch customers");
       
-      // Get shopkeeper ID
-      const { data: sk } = await supabase
-        .from("shopkeepers")
-        .select("id")
-        .eq("auth_id", user?.id)
-        .single();
-        
-      if (!sk) {
-        toast.error("Shopkeeper profile not found");
-        return;
-      }
-
-      // Fetch all customers with their last transaction date
-      const { data, error } = await supabase
-        .from("customers")
-        .select(`
-          id,
-          name,
-          phone,
-          balance,
-          transactions (
-            date
-          )
-        `)
-        .eq("shopkeeper_id", sk.id)
-        .order("balance", { ascending: false });
-
-      if (error) throw error;
-
-      // Process customers to get last activity
-      const processedCustomers = data?.map((customer: any) => {
-        const lastTransaction = customer.transactions?.[0];
-        return {
-          id: customer.id,
-          name: customer.name,
-          phone: customer.phone,
-          balance: customer.balance || 0,
-          last_activity: lastTransaction?.date || new Date().toISOString()
-        };
-      }) || [];
+      const data = await res.json();
+      
+      // The local API returns customers with balance. 
+      // We'll treat created_at or latest transaction date as activity if needed.
+      const processedCustomers = data.map((c: any) => ({
+        ...c,
+        last_activity: c.created_at || new Date().toISOString()
+      }));
 
       setCustomers(processedCustomers);
     } catch (error) {
       console.error("Error fetching customers:", error);
-      toast.error("Failed to load customers");
+      toast.error("Failed to load customers from local database");
     } finally {
       setLoading(false);
     }
   };
 
   const fetchCustomerTransactions = async (customerId: string) => {
-    if (customerTransactions[customerId]) {
-      // Already fetched
-      return;
-    }
+    if (customerTransactions[customerId]) return;
 
     try {
-      const { data, error } = await supabase
-        .from("transactions")
-        .select("id, type, amount, description, date")
-        .eq("customer_id", customerId)
-        .order("date", { ascending: false });
-
-      if (error) throw error;
+      const res = await fetch(`http://localhost:8000/api/transactions/${customerId}`);
+      if (!res.ok) throw new Error("Failed to fetch transactions");
+      const data = await res.json();
 
       setCustomerTransactions(prev => ({
         ...prev,
@@ -125,24 +97,27 @@ export default function Customer() {
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    if (!dateString) return "N/A";
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return dateString; // Return as is if not a valid date string
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) return "Today";
-    if (diffDays === 1) return "Yesterday";
-    if (diffDays < 7) return `${diffDays} days ago`;
-    return date.toLocaleDateString();
+      if (diffDays === 0) return "Today";
+      if (diffDays === 1) return "Yesterday";
+      if (diffDays < 7) return `${diffDays} days ago`;
+      return date.toLocaleDateString();
+    } catch {
+      return dateString;
+    }
   };
 
   const filteredCustomers = customers.filter(customer =>
     customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     customer.phone.includes(searchQuery)
   );
-
-  const totalBalance = customers.reduce((sum, c) => sum + c.balance, 0);
-  const activeCustomers = customers.length;
 
   return (
     <DashboardShell
@@ -163,7 +138,7 @@ export default function Customer() {
               <span className="text-xs font-semibold uppercase tracking-[0.25em]">Active customers</span>
               <Users className="size-5 text-primary" />
             </div>
-            <div className="mt-4 font-display text-3xl text-ink">{activeCustomers}</div>
+            <div className="mt-4 font-display text-3xl text-ink">{stats.activeCustomers}</div>
           </div>
 
           <div className="rounded-[28px] border border-border bg-background p-5 shadow-lg shadow-primary/5">
@@ -171,7 +146,7 @@ export default function Customer() {
               <span className="text-xs font-semibold uppercase tracking-[0.25em]">Total pending</span>
               <TrendingUp className="size-5 text-primary" />
             </div>
-            <div className="mt-4 font-display text-3xl text-ink">Rs. {totalBalance.toLocaleString()}</div>
+            <div className="mt-4 font-display text-3xl text-ink">Rs. {stats.totalBalance.toLocaleString()}</div>
           </div>
 
           <div className="rounded-[28px] border border-border bg-background p-5 shadow-lg shadow-primary/5">

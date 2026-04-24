@@ -6,74 +6,172 @@ from pathlib import Path
 import tempfile
 import os
 import uuid
+import sqlite3
+from datetime import datetime
 from khata_ocr import build_llm, extract_khata
 from dotenv import load_dotenv
 
-load_dotenv(".env.local")
+load_dotenv() # Load from .env
 
 app = FastAPI(title="KhataLens API")
 
-# CORS configuration - must be before routes
+# CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:8080", "http://127.0.0.1:8080"],
+    allow_origins=["*"], # Allow all for local development
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_methods=["*"],
     allow_headers=["*"],
-    expose_headers=["*"],
 )
+
+# --- Database Setup ---
+DB_PATH = "khata.db"
+
+def get_db():
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+def init_db():
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    # Customers table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS customers (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            phone TEXT UNIQUE,
+            balance REAL DEFAULT 0,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    # Transactions table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS transactions (
+            id TEXT PRIMARY KEY,
+            customer_id TEXT NOT NULL,
+            type TEXT NOT NULL,
+            amount REAL NOT NULL,
+            description TEXT,
+            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (customer_id) REFERENCES customers (id)
+        )
+    ''')
+    
+    conn.commit()
+    conn.close()
+
+init_db()
 
 # Initialize the LLM once
 api_key = os.environ.get("GOOGLE_API_KEY")
 if not api_key:
-    raise RuntimeError("GOOGLE_API_KEY is not set in the environment.")
-llm = build_llm(api_key)
+    # Fallback to VITE_GOOGLE_API_KEY if exists
+    api_key = os.environ.get("VITE_GOOGLE_API_KEY")
 
-@app.get("/")
-async def root():
-    return {"message": "KhataLens API is running"}
+if not api_key:
+    print("WARNING: GOOGLE_API_KEY is not set.")
+    llm = None
+else:
+    llm = build_llm(api_key)
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy"}
+    return {"status": "healthy", "database": "sqlite"}
+
+# --- OCR Endpoints ---
 
 @app.post("/api/extract")
 def extract_api(file: UploadFile = File(...)):
-    print(f"[API] Received file: {file.filename}")
-    if not file.filename:
-        raise HTTPException(status_code=400, detail="No file uploaded")
-    
-    # Save the uploaded file temporarily
+    if not llm:
+        raise HTTPException(status_code=500, detail="LLM not initialized. Check API key.")
+        
     temp_dir = Path(tempfile.gettempdir()) / "khatalens"
     temp_dir.mkdir(exist_ok=True)
-    unique_filename = f"{uuid.uuid4().hex}_{file.filename}"
-    temp_path = temp_dir / unique_filename
+    temp_path = temp_dir / f"{uuid.uuid4().hex}_{file.filename}"
     
     try:
-        print(f"[API] Saving file to: {temp_path}")
         content = file.file.read()
         with open(temp_path, "wb") as f:
             f.write(content)
         
-        print(f"[API] Starting OCR extraction...")
-        # Run OCR
         page = extract_khata(temp_path, llm)
-        print(f"[API] Extraction complete! Found {len(page.entries)} entries")
         return page.model_dump()
         
     except Exception as e:
-        print(f"[API] ERROR: {str(e)}")
-        import traceback
-        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
     finally:
-        # Clean up
         if temp_path.exists():
-            try:
-                temp_path.unlink()
-                print(f"[API] Cleaned up temp file")
-            except Exception as e:
-                print(f"[API] Could not clean up temp file: {e}")
+            temp_path.unlink()
+
+# --- Ledger Endpoints ---
+
+@app.get("/api/customers")
+def get_customers():
+    conn = get_db()
+    customers = conn.execute("SELECT * FROM customers ORDER BY balance DESC").fetchall()
+    conn.close()
+    return [dict(c) for c in customers]
+
+@app.get("/api/stats")
+def get_stats():
+    conn = get_db()
+    total_balance = conn.execute("SELECT SUM(balance) FROM customers").fetchone()[0] or 0
+    active_customers = conn.execute("SELECT COUNT(*) FROM customers").fetchone()[0] or 0
+    conn.close()
+    return {
+        "totalBalance": total_balance,
+        "activeCustomers": active_customers
+    }
+
+@app.post("/api/import")
+async def import_entries(data: dict):
+    # data: { entries: [{name, phone, amount}], date: string }
+    conn = get_db()
+    cursor = conn.cursor()
+    
+    try:
+        entries = data.get("entries", [])
+        import_date = data.get("date") or datetime.now().isoformat()
+        
+        for entry in entries:
+            name = entry.get("name")
+            phone = entry.get("phone")
+            amount = float(entry.get("amount", 0))
+            
+            # Check if customer exists by name and phone
+            cursor.execute("SELECT id, balance FROM customers WHERE phone = ?", (phone,))
+            existing = cursor.fetchone()
+            
+            if existing:
+                customer_id = existing["id"]
+                new_balance = existing["balance"] + amount
+                cursor.execute("UPDATE customers SET balance = ? WHERE id = ?", (new_balance, customer_id))
+            else:
+                customer_id = str(uuid.uuid4())
+                cursor.execute("INSERT INTO customers (id, name, phone, balance) VALUES (?, ?, ?, ?)",
+                             (customer_id, name, phone, amount))
+            
+            # Add transaction
+            cursor.execute("INSERT INTO transactions (id, customer_id, type, amount, description, date) VALUES (?, ?, ?, ?, ?, ?)",
+                         (str(uuid.uuid4()), customer_id, "credit", amount, "Imported via OCR", import_date))
+        
+        conn.commit()
+        return {"status": "success", "imported": len(entries)}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+@app.get("/api/transactions/{customer_id}")
+def get_transactions(customer_id: str):
+    conn = get_db()
+    txs = conn.execute("SELECT * FROM transactions WHERE customer_id = ? ORDER BY date DESC", (customer_id,)).fetchall()
+    conn.close()
+    return [dict(t) for t in txs]
 
 if __name__ == "__main__":
     uvicorn.run("api:app", host="0.0.0.0", port=8000, reload=True)
