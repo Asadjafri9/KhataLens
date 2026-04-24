@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Check, X, Zap, Layers, Sparkles, BarChart3, Users, Lock, Star } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { ScribbleUnderline } from "@/components/ScribbleUnderline";
@@ -50,14 +50,25 @@ const Header = () => {
   );
 };
 
-const Hero = () => (
-  <section className="relative pt-36 pb-28 bg-grid overflow-hidden">
+const Hero = () => {
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const [trigger, setTrigger] = useState<HTMLElement | null>(null);
+  useEffect(() => {
+    setTrigger(sectionRef.current);
+  }, []);
+  return (
+  <section ref={sectionRef} className="relative pt-36 pb-28 bg-grid overflow-hidden">
     <div className="absolute inset-0 bg-gradient-to-b from-background/0 via-background/30 to-background pointer-events-none" />
-    {/* Floating 3D cube — top-right of hero */}
-    <div className="pointer-events-none absolute right-2 sm:right-6 md:right-10 top-24 md:top-28 w-[180px] sm:w-[240px] md:w-[320px] lg:w-[380px] z-10 opacity-90">
-      <BrandedRubiksCube />
+    {/* Centered 3D cube — sits BEHIND the headline */}
+    <div
+      aria-hidden
+      className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-44 md:top-40 w-[420px] sm:w-[520px] md:w-[640px] lg:w-[760px] aspect-square z-0 opacity-70"
+    >
+      <BrandedRubiksCube scrollTriggerEl={trigger} />
     </div>
-    <div className="container relative">
+    {/* Soft veil to keep headline crisp over cube */}
+    <div className="pointer-events-none absolute inset-x-0 top-32 h-[55vh] bg-gradient-to-b from-background/60 via-background/20 to-background/0 z-[1]" />
+    <div className="container relative z-10">
 
       <Reveal className="flex justify-center">
         <span className="inline-flex items-center gap-2 border border-border-strong bg-background/60 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-soft rounded-full">
@@ -103,7 +114,8 @@ const Hero = () => (
       </Reveal>
     </div>
   </section>
-);
+  );
+};
 
 const ProductMockup = () => (
   <div className="mx-auto max-w-5xl border border-border-strong bg-background rounded-lg shadow-2xl shadow-primary/10 overflow-hidden">
