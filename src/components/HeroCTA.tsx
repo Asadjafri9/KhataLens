@@ -10,7 +10,7 @@ export function HeroCTA() {
     if (user) {
       navigate("/customer");
     } else {
-      signInWithGoogle();
+      navigate("/login");
     }
   };
 
