@@ -45,7 +45,8 @@ const Header = () => {
       </div>
     </div>
   </header>
-);
+  );
+};
 
 const Hero = () => (
   <section className="relative pt-36 pb-28 bg-grid overflow-hidden">
