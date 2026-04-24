@@ -1,3 +1,3 @@
-# Welcome to your Lovable project
+# Flux Project
 
 TODO: Document your project here
