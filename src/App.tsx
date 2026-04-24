@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -17,6 +17,14 @@ import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
 const dashboardRoutes = new Set(["/customer", "/import-sheet", "/analytics", "/chat-bot"]);
+
+// Guard: redirects to /login if not authenticated
+function ProtectedRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  if (loading) return null; // wait for auth to resolve
+  if (!user) return <Navigate to="/login" replace />;
+  return <>{children}</>;
+}
 
 function AppRoutes() {
   const location = useLocation();
@@ -73,11 +81,11 @@ function AppRoutes() {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/login" element={<Login cubeShouldAssemble={!isLoading} />} />
-        <Route path="/customer" element={<Customer />} />
-        <Route path="/import-sheet" element={<ImportSheet />} />
-        <Route path="/analytics" element={<Analytics />} />
-        <Route path="/chat-bot" element={<ChatBot />} />
-        <Route path="/dashboard" element={<Navigate to="/customer" replace />} />
+        <Route path="/customer" element={<ProtectedRoute><Customer /></ProtectedRoute>} />
+        <Route path="/import-sheet" element={<ProtectedRoute><ImportSheet /></ProtectedRoute>} />
+        <Route path="/analytics" element={<ProtectedRoute><Analytics /></ProtectedRoute>} />
+        <Route path="/chat-bot" element={<ProtectedRoute><ChatBot /></ProtectedRoute>} />
+        <Route path="/dashboard" element={<ProtectedRoute><Navigate to="/customer" replace /></ProtectedRoute>} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />
       </Routes>

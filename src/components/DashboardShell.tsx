@@ -1,4 +1,5 @@
 import { ReactNode, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { BarChart3, Bot, FileSpreadsheet, LogOut, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -32,6 +33,7 @@ interface DashboardShellProps {
 export function DashboardShell({ title, subtitle, actions, children }: DashboardShellProps) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   return (
@@ -160,7 +162,10 @@ export function DashboardShell({ title, subtitle, actions, children }: Dashboard
               </AlertDialogCancel>
               <AlertDialogAction
                 className="h-11 rounded-full bg-primary-foreground px-6 text-primary hover:bg-primary-soft hover:text-primary"
-                onClick={() => navigate("/")}
+                onClick={async () => {
+                  await signOut();
+                  navigate("/");
+                }}
               >
                 Yes, exit
               </AlertDialogAction>
