@@ -38,7 +38,30 @@ export default function ImportSheet() {
     setExtractedDate(null);
     
     try {
-      // Send image to Python FastAPI directly without shopkeeper check
+      // Get shopkeeper ID first
+      console.log("Getting shopkeeper ID...");
+      const { data: sk, error: skError } = await supabase
+        .from("shopkeepers")
+        .select("id")
+        .eq("auth_id", user.id)
+        .single();
+        
+      if (skError || !sk) {
+        console.error("Shopkeeper error:", skError);
+        throw new Error("Shopkeeper profile not found. Please complete your profile first.");
+      }
+      
+      console.log("Shopkeeper ID:", sk.id);
+      
+      // Fetch all existing customers for matching
+      const { data: existingCustomers } = await supabase
+        .from("customers")
+        .select("id, name, phone, balance")
+        .eq("shopkeeper_id", sk.id);
+      
+      console.log("Existing customers:", existingCustomers);
+      
+      // Send image to Python FastAPI
       const formData = new FormData();
       formData.append("file", file);
       
@@ -73,14 +96,38 @@ export default function ImportSheet() {
         
       const processedRows = data.entries.map((entry: any, index: number) => {
         let phone = entry.phone;
-        let status = phone ? "Ready" : "Needs Phone";
+        let status = "Ready";
+        let matchedCustomerId = null;
+        
+        // If phone is missing, try to match by exact name
+        if (!phone && existingCustomers) {
+          const match = existingCustomers.find(c => 
+            c.name.toLowerCase().trim() === entry.name.toLowerCase().trim()
+          );
+          if (match && match.phone) {
+            phone = match.phone;
+            matchedCustomerId = match.id;
+            status = "Auto-matched from records";
+          } else {
+            status = "Phone required";
+          }
+        } else if (phone && existingCustomers) {
+          // Check if this phone already exists
+          const match = existingCustomers.find(c => c.phone === phone);
+          if (match) {
+            matchedCustomerId = match.id;
+            status = "Existing customer";
+          }
+        }
         
         return {
           id: index.toString(),
           name: entry.name,
           amount: entry.amount,
           phone: phone || "",
-          status: status
+          status: status,
+          matchedCustomerId: matchedCustomerId,
+          originalPhone: entry.phone || "" // Track original extracted phone
         };
       });
       
@@ -118,7 +165,20 @@ export default function ImportSheet() {
   const handlePhoneChange = (id: string, newPhone: string) => {
     setRows(rows.map(r => {
       if (r.id === id) {
-        return { ...r, phone: newPhone, status: newPhone.trim() ? "Ready (Edited)" : "Needs Phone" };
+        const phoneChanged = newPhone.trim() !== r.originalPhone;
+        let newStatus = "Ready";
+        
+        if (!newPhone.trim()) {
+          newStatus = "Phone required";
+        } else if (phoneChanged) {
+          newStatus = "Modified - will create new entry";
+        } else if (r.status === "Auto-matched from records") {
+          newStatus = "Auto-matched from records";
+        } else if (r.status === "Existing customer") {
+          newStatus = "Existing customer";
+        }
+        
+        return { ...r, phone: newPhone, status: newStatus };
       }
       return r;
     }));
