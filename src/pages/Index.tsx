@@ -114,7 +114,8 @@ const Hero = () => {
       </Reveal>
     </div>
   </section>
-);
+  );
+};
 
 const ProductMockup = () => (
   <div className="mx-auto max-w-5xl border border-border-strong bg-background rounded-lg shadow-2xl shadow-primary/10 overflow-hidden">
