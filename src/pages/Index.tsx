@@ -39,8 +39,8 @@ const Header = () => {
         <a href="#testimonials" className="hover:text-primary transition-colors">Impact</a>
       </nav>
       <div className="flex items-center gap-3">
-        <a href="#" className="hidden sm:inline text-sm font-medium text-ink-soft hover:text-ink">Login</a>
-        <a href="#cta" className="inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:bg-primary-deep transition-colors">
+        <a href="/login" className="hidden sm:inline text-sm font-medium text-ink-soft hover:text-ink">Login</a>
+        <a href="/login" className="inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:bg-primary-deep transition-colors">
           Try KhataLens
           <ArrowRight className="size-4" />
         </a>
