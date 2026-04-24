@@ -1,5 +1,5 @@
 import { Canvas, useFrame } from "@react-three/fiber";
-import { RoundedBox, Environment } from "@react-three/drei";
+import { RoundedBox } from "@react-three/drei";
 import { useMemo, useRef, useEffect, useState } from "react";
 import * as THREE from "three";
 
@@ -169,8 +169,7 @@ function Scene() {
       <directionalLight position={[4, 6, 5]} intensity={1.1} color={"#fcf6f5"} />
       <directionalLight position={[-4, -2, -3]} intensity={0.35} color={"#990011"} />
       <pointLight position={[0, 0, 4]} intensity={0.4} color={"#fcf6f5"} />
-
-      <Environment preset="studio" />
+      <pointLight position={[3, -2, 2]} intensity={0.3} color={"#990011"} />
 
       <CubeModel />
     </>
