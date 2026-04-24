@@ -4,6 +4,7 @@ import { Reveal } from "@/components/Reveal";
 import { ScribbleUnderline } from "@/components/ScribbleUnderline";
 import { RevealText } from "@/components/RevealText";
 import { FlipCard } from "@/components/FlipCard";
+import BrandedRubiksCube from "@/components/BrandedRubiksCube";
 import { cn } from "@/lib/utils";
 
 const Logo = () => (
