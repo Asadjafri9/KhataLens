@@ -21,7 +21,7 @@ export function HeroCTA() {
           type="submit"
           className="h-full bg-primary text-primary-foreground px-8 rounded-[10px] font-body font-semibold text-sm hover:bg-primary-deep transition-colors"
         >
-          Get Access
+          Scan My Khata
         </button>
       </form>
 
@@ -29,7 +29,7 @@ export function HeroCTA() {
         type="button"
         className="h-14 px-8 border-2 border-primary text-primary font-body font-semibold text-sm rounded-xl hover:bg-primary hover:text-primary-foreground transition-colors"
       >
-        Learn More
+        See How It Works
       </button>
     </div>
   );
