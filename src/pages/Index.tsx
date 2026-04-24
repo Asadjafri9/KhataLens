@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { ArrowRight, Check, X, Zap, Layers, Sparkles, BarChart3, Users, Lock, Star } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { ScribbleUnderline } from "@/components/ScribbleUnderline";
+import { HeroCTA } from "@/components/HeroCTA";
 import { FlipCard } from "@/components/FlipCard";
 import BrandedRubiksCube from "@/components/BrandedRubiksCube";
 import { cn } from "@/lib/utils";
@@ -88,19 +89,9 @@ const Hero = () => {
           Flux is the operating system for product teams who want to move{" "}
           <ScribbleUnderline>fast</ScribbleUnderline> without the chaos. Plan, build, and ship in one sharp workspace.
         </p>
-        <form className="mt-10 mx-auto max-w-xl flex flex-col sm:flex-row gap-3">
-          <input
-            type="email"
-            placeholder="you@company.com"
-            className="flex-1 h-14 px-5 bg-background border border-border-strong rounded-md text-base placeholder:text-ink-soft/60 focus:outline-none focus:border-primary transition-colors"
-          />
-          <button
-            type="submit"
-            className="h-14 px-7 font-display uppercase text-lg bg-primary text-primary-foreground rounded-md hover:bg-primary-deep transition-colors"
-          >
-            Join Waitlist
-          </button>
-        </form>
+        <div className="mt-10 mx-auto max-w-4xl">
+          <HeroCTA />
+        </div>
         <p className="mt-4 text-xs text-ink-soft">No spam. Free during beta. Cancel anytime.</p>
       </div>
 
