@@ -62,8 +62,11 @@ class KhataPage(BaseModel):
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
+from PIL import Image
+import io
+
 def image_to_base64(image_path: Path) -> tuple[str, str]:
-    """Return (base64_string, mime_type) for the given image file."""
+    """Compress image and return (base64_string, mime_type) to drastically speed up API calls."""
     ext = image_path.suffix.lower()
     mime_map = {
         ".jpg":  "image/jpeg",
@@ -72,8 +75,25 @@ def image_to_base64(image_path: Path) -> tuple[str, str]:
         ".webp": "image/webp",
     }
     mime = mime_map.get(ext, "image/jpeg")
-    with open(image_path, "rb") as f:
-        b64 = base64.b64encode(f.read()).decode("utf-8")
+    
+    # Open image, resize if too large, and compress
+    img = Image.open(image_path)
+    
+    # Convert RGBA to RGB for JPEG
+    if img.mode in ("RGBA", "P"):
+        img = img.convert("RGB")
+        
+    # Resize if max dimension is > 1600px to save massive upload time
+    max_dim = 1600
+    if max(img.size) > max_dim:
+        img.thumbnail((max_dim, max_dim), Image.Resampling.LANCZOS)
+        
+    # Save to memory buffer with high compression
+    buffer = io.BytesIO()
+    img.save(buffer, format="JPEG", quality=75)
+    mime = "image/jpeg" # We forced it to JPEG
+    
+    b64 = base64.b64encode(buffer.getvalue()).decode("utf-8")
     return b64, mime
 
 
