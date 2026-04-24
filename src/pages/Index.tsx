@@ -3,6 +3,7 @@ import { ArrowRight, Check, X, Zap, Layers, Sparkles, BarChart3, Users, Lock, St
 import { Reveal } from "@/components/Reveal";
 import { ScribbleUnderline } from "@/components/ScribbleUnderline";
 import { RevealText } from "@/components/RevealText";
+import { FlipCard } from "@/components/FlipCard";
 import { cn } from "@/lib/utils";
 
 const Logo = () => (
