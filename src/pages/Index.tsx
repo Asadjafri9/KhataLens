@@ -1,6 +1,9 @@
+import { useEffect, useState } from "react";
 import { ArrowRight, Check, X, Zap, Layers, Sparkles, BarChart3, Users, Lock, Star } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
-import { HandUnderline } from "@/components/HandUnderline";
+import { ScribbleUnderline } from "@/components/ScribbleUnderline";
+import { RevealText } from "@/components/RevealText";
+import { cn } from "@/lib/utils";
 
 const Logo = () => (
   <a href="#" className="font-display text-3xl uppercase tracking-tight text-ink">
@@ -8,8 +11,23 @@ const Logo = () => (
   </a>
 );
 
-const Header = () => (
-  <header className="fixed top-0 inset-x-0 z-50 h-20 border-b border-border/70 bg-background/80 backdrop-blur-md">
+const Header = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+  return (
+  <header
+    className={cn(
+      "fixed top-0 inset-x-0 z-50 h-20 transition-all duration-300",
+      isScrolled
+        ? "border-b border-border/70 bg-background/80 backdrop-blur-md"
+        : "border-b border-transparent bg-transparent"
+    )}
+  >
     <div className="container h-full flex items-center justify-between">
       <Logo />
       <nav className="hidden md:flex items-center gap-10 text-sm font-medium text-ink-soft">
@@ -27,7 +45,8 @@ const Header = () => (
       </div>
     </div>
   </header>
-);
+  );
+};
 
 const Hero = () => (
   <section className="relative pt-36 pb-28 bg-grid overflow-hidden">
@@ -53,7 +72,7 @@ const Hero = () => (
         </h1>
         <p className="mt-8 mx-auto max-w-xl text-lg text-ink-soft font-medium">
           Flux is the operating system for product teams who want to move{" "}
-          <HandUnderline>fast</HandUnderline> without the chaos. Plan, build, and ship in one sharp workspace.
+          <ScribbleUnderline>fast</ScribbleUnderline> without the chaos. Plan, build, and ship in one sharp workspace.
         </p>
         <form className="mt-10 mx-auto max-w-xl flex flex-col sm:flex-row gap-3">
           <input
@@ -217,7 +236,7 @@ const Bento = () => (
       <Reveal className="max-w-3xl">
         <div className="text-[11px] uppercase tracking-[0.25em] text-primary font-bold">Features</div>
         <h2 className="mt-4 font-display text-5xl md:text-7xl uppercase text-ink">
-          Built for teams<br/>who actually <HandUnderline>ship</HandUnderline>.
+          Built for teams<br/>who actually <ScribbleUnderline>ship</ScribbleUnderline>.
         </h2>
       </Reveal>
 
