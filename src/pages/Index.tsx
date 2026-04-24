@@ -67,7 +67,7 @@ const Hero = () => {
       <BrandedRubiksCube scrollTriggerEl={trigger} />
     </div>
     {/* Transparent veil in front of cube for text readability */}
-    <div className="pointer-events-none absolute inset-x-0 top-16 h-[62vh] bg-gradient-to-b from-background/60 via-background/20 to-background/0 z-[1]" />
+    <div className="pointer-events-none absolute inset-x-0 top-16 h-[62vh] bg-gradient-to-b from-background/80 via-background/50 to-background/0 z-[1]" />
     <div className="container relative z-10">
 
       <Reveal className="flex justify-center">
@@ -78,21 +78,21 @@ const Hero = () => {
       </Reveal>
 
       <div className="mt-8 text-center">
-        <h1 className="font-display text-ink text-[12vw] sm:text-6xl md:text-7xl lg:text-[8rem] leading-[0.95] tracking-[-0.02em]">
+        <h1 className="font-display text-ink text-[11vw] sm:text-5xl md:text-7xl lg:text-[8rem] leading-[0.95] tracking-[-0.02em]">
           <span className="block">SNAP KHATA,</span>
           <span className="block mt-1">
             <ScribbleUnderline>GET</ScribbleUnderline>{" "}
             <span className="text-primary">DIGITAL</span>.
           </span>
         </h1>
-        <p className="mt-8 mx-auto max-w-xl text-lg text-ink-soft font-medium">
+        <p className="mt-8 mx-auto max-w-xl text-base sm:text-lg text-ink font-medium leading-relaxed">
           Pakistan's small businesses already have data — it's just{" "}
           <ScribbleUnderline>trapped</ScribbleUnderline> inside paper. KhataLens unlocks it using AI.
         </p>
         <div className="mt-10 mx-auto max-w-4xl">
           <HeroCTA />
         </div>
-        <p className="mt-4 text-xs text-ink-soft">📸 Photo → 🧠 Extract → 🧾 Structure → ⚠️ Detect overdue → 💬 Generate reminder</p>
+        <p className="mt-4 text-xs sm:text-sm text-ink-soft">📸 Photo → 🧠 Extract → 🧾 Structure → ⚠️ Detect overdue → 💬 Generate reminder</p>
       </div>
 
       {/* Mockup */}
@@ -110,11 +110,11 @@ const ProductMockup = () => (
       <span className="size-3 rounded-full bg-primary/80" />
       <span className="size-3 rounded-full bg-primary/40" />
       <span className="size-3 rounded-full bg-primary/20" />
-      <span className="mx-auto text-xs font-medium text-ink-soft">khatalens.app / scan / ledger-page-04</span>
+      <span className="mx-auto text-xs font-medium text-ink-soft hidden sm:inline">khatalens.app / scan / ledger-page-04</span>
     </div>
-    <div className="grid grid-cols-12 min-h-[420px]">
-      {/* Sidebar — scanned pages */}
-      <aside className="col-span-3 border-r border-border bg-surface/60 p-4 space-y-1.5">
+    <div className="grid grid-cols-1 md:grid-cols-12 min-h-[300px] md:min-h-[420px]">
+      {/* Sidebar — scanned pages (hidden on mobile) */}
+      <aside className="hidden md:block col-span-3 border-r border-border bg-surface/60 p-4 space-y-1.5">
         {["📷 Upload Page", "📄 Page 1", "📄 Page 2", "📄 Page 3 ★", "📊 Insights", "💬 Reminders"].map((i, idx) => (
           <div key={i} className={`text-xs font-medium px-3 py-2 rounded ${idx === 3 ? 'bg-primary/10 text-primary' : 'text-ink-soft'}`}>
             {i}
@@ -122,30 +122,30 @@ const ProductMockup = () => (
         ))}
       </aside>
       {/* Extracted ledger table */}
-      <div className="col-span-6 bg-grid p-6 relative">
-        <div className="bg-background border border-border rounded-md p-5 shadow-md">
-          <div className="text-[10px] uppercase tracking-widest text-primary font-bold">Extracted Records</div>
+      <div className="col-span-1 md:col-span-6 bg-grid p-4 sm:p-6 relative">
+        <div className="bg-background border border-border rounded-md p-4 sm:p-5 shadow-md">
+          <div className="text-[10px] sm:text-xs uppercase tracking-widest text-primary font-bold">Extracted Records</div>
           <div className="mt-3 space-y-2">
             {[
               { name: "Aslam", amt: "Rs. 2,500", status: "Overdue", color: "text-red-600" },
               { name: "Imran", amt: "Rs. 1,000", status: "Paid", color: "text-green-600" },
               { name: "Naeem", amt: "Rs. 900", status: "Pending", color: "text-amber-600" },
             ].map(r => (
-              <div key={r.name} className="flex items-center justify-between text-xs border-b border-border pb-2">
+              <div key={r.name} className="flex items-center justify-between text-xs sm:text-sm border-b border-border pb-2">
                 <span className="font-medium text-ink">{r.name}</span>
                 <span className="text-ink-soft">{r.amt}</span>
                 <span className={`font-bold ${r.color}`}>{r.status}</span>
               </div>
             ))}
           </div>
-          <div className="mt-3 text-[10px] text-ink-soft">3 entries • 95% confidence • AI structured</div>
+          <div className="mt-3 text-[10px] sm:text-xs text-ink-soft">3 entries • 95% confidence • AI structured</div>
         </div>
-        <div className="absolute bottom-6 right-6 px-3 py-1.5 bg-primary text-primary-foreground text-xs font-semibold rounded shadow-lg">
+        <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6 px-3 py-1.5 bg-primary text-primary-foreground text-xs font-semibold rounded shadow-lg">
           ▸ Send Reminder
         </div>
       </div>
-      {/* Insights panel */}
-      <aside className="col-span-3 border-l border-border bg-surface/60 p-4 space-y-4 text-xs">
+      {/* Insights panel (hidden on mobile) */}
+      <aside className="hidden md:block col-span-3 border-l border-border bg-surface/60 p-4 space-y-4 text-xs">
         <div>
           <div className="font-display uppercase text-ink mb-2">Recoverable</div>
           <div className="px-2 py-1.5 bg-primary/10 text-primary rounded font-medium inline-block">Rs. 3,400</div>
@@ -157,8 +157,8 @@ const ProductMockup = () => (
         <div>
           <div className="font-display uppercase text-ink mb-2">Reminder</div>
           <div className="bg-ink text-background rounded p-2 text-[10px] font-mono leading-relaxed">
-            <div className="text-primary/80">Aslam bhai,</div>
-            <div className="opacity-70">aap ka Rs. 2,500 udhaar pending hai.</div>
+            <div className="text-primary-soft">Aslam bhai,</div>
+            <div className="opacity-80">aap ka Rs. 2,500 udhaar pending hai.</div>
           </div>
         </div>
       </aside>
@@ -180,8 +180,8 @@ const SocialProof = () => (
           { stat: "5 sec", label: "KhataLens scan time" },
         ].map(b => (
           <div key={b.stat} className="text-center">
-            <div className="font-display text-3xl text-primary">{b.stat}</div>
-            <div className="mt-1 text-xs text-ink-soft">{b.label}</div>
+            <div className="font-display text-2xl sm:text-3xl text-primary">{b.stat}</div>
+            <div className="mt-1 text-xs sm:text-sm text-ink">{b.label}</div>
           </div>
         ))}
       </div>
@@ -194,8 +194,8 @@ const ProblemSolution = () => (
     {/* Problem */}
     <div className="bg-primary-darker text-background p-10 md:p-16 bg-grid-dark">
       <Reveal>
-        <div className="text-[11px] uppercase tracking-[0.25em] text-background/50 font-semibold">The paper problem</div>
-        <h3 className="mt-6 font-display text-5xl md:text-6xl uppercase">
+        <div className="text-[11px] sm:text-xs uppercase tracking-[0.25em] text-background/60 font-semibold">The paper problem</div>
+        <h3 className="mt-6 font-display text-3xl sm:text-5xl md:text-6xl uppercase">
           Data trapped<br/>in messy<br/>notebooks.
         </h3>
         <ul className="mt-10 space-y-4">
@@ -205,7 +205,7 @@ const ProblemSolution = () => (
             "Manual follow-ups that never happen",
             "No visibility into who owes what",
           ].map(t => (
-            <li key={t} className="flex items-start gap-3 text-background/75 font-medium">
+            <li key={t} className="flex items-start gap-3 text-background/90 font-medium text-sm sm:text-base">
               <X className="size-5 text-primary mt-0.5 shrink-0" />
               {t}
             </li>
@@ -217,8 +217,8 @@ const ProblemSolution = () => (
     <div className="bg-primary text-primary-foreground p-10 md:p-16 border-l-4 border-background/10 relative overflow-hidden">
       <div className="absolute inset-0 bg-grid-dark opacity-40" />
       <Reveal className="relative">
-        <div className="text-[11px] uppercase tracking-[0.25em] text-primary-foreground/70 font-semibold">The KhataLens way</div>
-        <h3 className="mt-6 font-display text-5xl md:text-6xl uppercase">
+        <div className="text-[11px] sm:text-xs uppercase tracking-[0.25em] text-primary-foreground/80 font-semibold">The KhataLens way</div>
+        <h3 className="mt-6 font-display text-3xl sm:text-5xl md:text-6xl uppercase">
           Snap a photo.<br/>Get a digital<br/>ledger.
         </h3>
         <ul className="mt-10 space-y-4">
@@ -228,7 +228,7 @@ const ProblemSolution = () => (
             "Overdue accounts flagged automatically",
             "WhatsApp reminders generated in Urdu & English",
           ].map(t => (
-            <li key={t} className="flex items-start gap-3 font-medium">
+            <li key={t} className="flex items-start gap-3 font-medium text-sm sm:text-base">
               <Check className="size-5 mt-0.5 shrink-0" strokeWidth={3} />
               {t}
             </li>
@@ -250,20 +250,20 @@ const Bento = () => (
     <div className="container">
       <Reveal className="max-w-3xl">
         <div className="text-[11px] uppercase tracking-[0.25em] text-primary font-bold">4 AI Layers</div>
-        <h2 className="mt-4 font-display text-5xl md:text-7xl uppercase text-ink">
+        <h2 className="mt-4 font-display text-3xl sm:text-5xl md:text-7xl uppercase text-ink">
           Not just OCR.<br/>Real <ScribbleUnderline>intelligence</ScribbleUnderline>.
         </h2>
       </Reveal>
 
-      <div className="mt-16 grid grid-cols-1 md:grid-cols-3 auto-rows-[minmax(360px,auto)] gap-5">
+      <div className="mt-16 grid grid-cols-1 md:grid-cols-3 auto-rows-[minmax(280px,auto)] sm:auto-rows-[minmax(360px,auto)] gap-5">
         <FlipCard
           variant="dark"
           className="md:col-span-2 min-h-[360px]"
           front={
             <>
               <Eye className="size-8 text-primary" />
-              <h3 className="mt-6 font-display text-3xl uppercase">Vision AI</h3>
-              <p className="mt-3 text-background/70 max-w-md">Reads messy handwritten ledger pages — uneven lines, abbreviations, mixed Urdu/English, inconsistent formats.</p>
+              <h3 className="mt-6 font-display text-2xl sm:text-3xl uppercase">Vision AI</h3>
+              <p className="mt-3 text-background/80 max-w-md text-sm sm:text-base">Reads messy handwritten ledger pages — uneven lines, abbreviations, mixed Urdu/English, inconsistent formats.</p>
               <div className="mt-8 grid grid-cols-3 gap-2">
                 {[...Array(9)].map((_, i) => (
                   <div key={i} className={`h-10 rounded ${i % 3 === 0 ? 'bg-primary' : 'bg-background/10'} ${i % 2 === 0 ? 'animate-pulse-soft' : ''}`} style={{ animationDelay: `${i * 120}ms` }} />
@@ -291,8 +291,8 @@ const Bento = () => (
           front={
             <>
               <Brain className="size-8 text-primary" />
-              <h3 className="mt-6 font-display text-3xl uppercase">Language AI</h3>
-              <p className="mt-3 text-ink-soft">Understands what each notebook entry actually means.</p>
+              <h3 className="mt-6 font-display text-2xl sm:text-3xl uppercase">Language AI</h3>
+              <p className="mt-3 text-ink-soft text-sm sm:text-base">Understands what each notebook entry actually means.</p>
               <div className="mt-6 bg-ink text-background rounded p-4 text-xs font-mono leading-relaxed">
                 <div className="text-primary/80">"Aslam 2500 kal"</div>
                 <div className="opacity-70">→ Customer: Aslam</div>
@@ -315,8 +315,8 @@ const Bento = () => (
           front={
             <>
               <ScanLine className="size-8 text-primary" />
-              <h3 className="mt-6 font-display text-3xl uppercase">Reasoning AI</h3>
-              <p className="mt-3 text-ink-soft">Detects overdue and risky accounts automatically.</p>
+              <h3 className="mt-6 font-display text-2xl sm:text-3xl uppercase">Reasoning AI</h3>
+              <p className="mt-3 text-ink-soft text-sm sm:text-base">Detects overdue and risky accounts automatically.</p>
               <div className="mt-6 space-y-2">
                 <div className="h-3 bg-red-500/80 rounded-full w-5/6" />
                 <div className="h-3 bg-amber-500/60 rounded-full w-3/5" />
@@ -338,8 +338,8 @@ const Bento = () => (
           front={
             <>
               <MessageSquare className="size-8 text-primary" />
-              <h3 className="mt-6 font-display text-3xl uppercase">Generative AI</h3>
-              <p className="mt-3 text-ink-soft max-w-md">Creates personalized recovery messages from extracted ledger data, ready to send via WhatsApp.</p>
+              <h3 className="mt-6 font-display text-2xl sm:text-3xl uppercase">Generative AI</h3>
+              <p className="mt-3 text-ink-soft max-w-md text-sm sm:text-base">Creates personalized recovery messages from extracted ledger data, ready to send via WhatsApp.</p>
               <div className="mt-8 space-y-3">
                 <div className="bg-surface border border-border rounded-lg p-4 text-sm">
                   <div className="text-[10px] uppercase tracking-widest text-primary font-bold mb-2">Urdu reminder</div>
@@ -366,8 +366,8 @@ const Bento = () => (
           front={
             <>
               <Send className="size-8 text-primary" />
-              <h3 className="mt-6 font-display text-3xl uppercase">WhatsApp Ready</h3>
-              <p className="mt-3 text-ink-soft">One-click send via the channel merchants already use daily.</p>
+              <h3 className="mt-6 font-display text-2xl sm:text-3xl uppercase">WhatsApp Ready</h3>
+              <p className="mt-3 text-ink-soft text-sm sm:text-base">One-click send via the channel merchants already use daily.</p>
               <div className="mt-6 flex flex-wrap gap-2">
                 {["WHATSAPP", "SMS", "COPY", "SHARE"].map(t => (
                   <span key={t} className="text-[10px] uppercase tracking-widest font-bold border border-border px-2 py-1 text-ink-soft">{t}</span>
@@ -389,8 +389,8 @@ const Bento = () => (
           front={
             <>
               <BookOpen className="size-8 text-primary" />
-              <h3 className="mt-6 font-display text-3xl uppercase">Export & Save</h3>
-              <p className="mt-3 text-ink-soft">Download structured data as CSV. Keep records safe forever.</p>
+              <h3 className="mt-6 font-display text-2xl sm:text-3xl uppercase">Export & Save</h3>
+              <p className="mt-3 text-ink-soft text-sm sm:text-base">Download structured data as CSV. Keep records safe forever.</p>
               <div className="mt-6 flex items-end gap-2 h-28">
                 {[40, 72, 55, 90, 65, 88, 76, 95, 60, 82].map((h, i) => (
                   <div key={i} className="flex-1 bg-primary/80 rounded-t" style={{ height: `${h}%` }} />
@@ -423,18 +423,18 @@ const HowItWorks = () => {
         <div className="md:sticky md:top-28 self-start">
           <Reveal>
             <div className="text-[11px] uppercase tracking-[0.25em] text-primary font-bold">Process</div>
-            <h2 className="mt-4 font-display text-5xl md:text-7xl uppercase text-ink">
+            <h2 className="mt-4 font-display text-3xl sm:text-5xl md:text-7xl uppercase text-ink">
               How<br/>it<br/>works.
             </h2>
           </Reveal>
         </div>
         <div className="md:col-span-2 space-y-12">
           {steps.map(s => (
-            <Reveal key={s.n} className="group flex gap-8 items-start border-t border-border pt-10">
-              <div className="font-display text-7xl md:text-8xl text-primary/20 group-hover:text-primary transition-colors duration-500 leading-none">{s.n}</div>
+            <Reveal key={s.n} className="group flex gap-4 sm:gap-8 items-start border-t border-border pt-10">
+              <div className="font-display text-5xl sm:text-7xl md:text-8xl text-primary/20 group-hover:text-primary transition-colors duration-500 leading-none">{s.n}</div>
               <div>
-                <h3 className="font-display text-3xl md:text-4xl uppercase text-ink">{s.title}</h3>
-                <p className="mt-3 text-ink-soft text-lg max-w-lg">{s.body}</p>
+                <h3 className="font-display text-2xl sm:text-3xl md:text-4xl uppercase text-ink">{s.title}</h3>
+                <p className="mt-3 text-ink-soft text-base sm:text-lg max-w-lg">{s.body}</p>
               </div>
             </Reveal>
           ))}
@@ -455,21 +455,21 @@ const Testimonials = () => {
       <div className="container">
         <Reveal className="max-w-3xl">
           <div className="text-[11px] uppercase tracking-[0.25em] text-primary font-bold">Real impact</div>
-          <h2 className="mt-4 font-display text-5xl md:text-7xl uppercase text-ink">Real shops.<br/>Real recovery.</h2>
+          <h2 className="mt-4 font-display text-3xl sm:text-5xl md:text-7xl uppercase text-ink">Real shops.<br/>Real recovery.</h2>
         </Reveal>
         <div className="mt-16 grid md:grid-cols-3 gap-5">
           {items.map((t, i) => {
             const initials = t.n.split(' ').map(p => p[0]).join('');
             return (
-              <Reveal key={i} className={`group/t [perspective:1200px] min-h-[320px] ${t.dark ? 'md:translate-y-4' : ''}`}>
+              <Reveal key={i} className={`group/t [perspective:1200px] min-h-[280px] sm:min-h-[320px] ${t.dark ? 'md:translate-y-4' : ''}`}>
                 <div className="relative h-full w-full transition-transform duration-700 [transform-style:preserve-3d] [transition-timing-function:cubic-bezier(0.61,0.98,0.48,1.01)] group-hover/t:[transform:rotate(180deg)_rotateX(180deg)]">
                   {/* Front */}
                   <div className={`absolute inset-0 [backface-visibility:hidden] border p-8 flex flex-col shadow-sm ${t.dark ? 'bg-primary-darker text-background border-primary-darker' : 'bg-card text-ink border-border'}`}>
                     <div className="flex gap-1">
                       {[...Array(5)].map((_, k) => (<Star key={k} className="size-5 fill-primary text-primary" />))}
                     </div>
-                    <p className={`mt-6 text-lg font-medium leading-snug ${t.dark ? 'text-background' : 'text-ink'}`}>"{t.q}"</p>
-                    <div className={`mt-auto pt-6 text-[10px] uppercase tracking-[0.25em] ${t.dark ? 'text-background/50' : 'text-ink-soft/70'}`}>Hover to meet them →</div>
+                    <p className={`mt-6 text-base sm:text-lg font-medium leading-snug ${t.dark ? 'text-background' : 'text-ink'}`}>"{t.q}"</p>
+                    <div className={`mt-auto pt-6 text-[10px] sm:text-[11px] uppercase tracking-[0.25em] ${t.dark ? 'text-background/60' : 'text-ink-soft'}`}>Hover to meet them →</div>
                   </div>
                   {/* Back */}
                   <div className={`absolute inset-0 [transform:rotateY(180deg)] [backface-visibility:hidden] border p-8 flex flex-col items-center justify-center text-center shadow-xl shadow-primary/20 ${t.dark ? 'bg-background text-ink border-border' : 'bg-primary text-primary-foreground border-primary'}`}>
@@ -497,11 +497,11 @@ const FinalCTA = () => (
     </div>
     <div className="container relative text-center">
       <Reveal stagger>
-        <div className="text-[11px] uppercase tracking-[0.25em] font-bold text-primary-foreground/70">Start today</div>
-        <h2 className="mt-6 font-display text-6xl md:text-8xl uppercase leading-[0.9]">
+        <div className="text-[11px] sm:text-xs uppercase tracking-[0.25em] font-bold text-primary-foreground/80">Start today</div>
+        <h2 className="mt-6 font-display text-4xl sm:text-6xl md:text-8xl uppercase leading-[0.9]">
           Stop losing money.<br/>Start <span className="italic font-display">recovering</span>.
         </h2>
-        <p className="mt-8 max-w-2xl mx-auto text-xl md:text-2xl text-primary-foreground/80 font-medium">
+        <p className="mt-8 max-w-2xl mx-auto text-lg sm:text-xl md:text-2xl text-primary-foreground/90 font-medium">
           KhataLens is not replacing bookkeeping apps. It is the AI bridge that gets small businesses into them.
         </p>
         <form className="mt-12 mx-auto max-w-xl flex flex-col sm:flex-row gap-3">

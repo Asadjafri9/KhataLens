@@ -11,7 +11,7 @@
     --surface: 8 40% 95%;               /* slight blush */
     --surface-2: 8 30% 92%;
     --ink: 350 20% 10%;                 /* deep ink */
-    --ink-soft: 350 15% 22%;
+    --ink-soft: 350 12% 35%;             /* softer ink — readable on light bg */
 
     --card: 0 0% 100%;
     --card-foreground: 350 15% 12%;
