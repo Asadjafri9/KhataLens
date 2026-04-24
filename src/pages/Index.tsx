@@ -1,12 +1,10 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
 import { ArrowRight, Check, X, Camera, Brain, MessageSquare, BarChart3, Eye, ScanLine, Star, BookOpen, Send } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { ScribbleUnderline } from "@/components/ScribbleUnderline";
 import { HeroCTA } from "@/components/HeroCTA";
 import { FlipCard } from "@/components/FlipCard";
 import BrandedRubiksCube from "@/components/BrandedRubiksCube";
-import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
 const Logo = () => (
@@ -17,23 +15,12 @@ const Logo = () => (
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const { user, signInWithGoogle } = useAuth();
-  const navigate = useNavigate();
   useEffect(() => {
     const onScroll = () => setIsScrolled(window.scrollY > 8);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
-
-  const handleAuthClick = () => {
-    if (user) {
-      navigate('/dashboard');
-    } else {
-      signInWithGoogle();
-    }
-  };
-
   return (
   <header
     className={cn(
@@ -52,13 +39,11 @@ const Header = () => {
         <a href="#testimonials" className="hover:text-primary transition-colors">Impact</a>
       </nav>
       <div className="flex items-center gap-3">
-        <button onClick={handleAuthClick} className="hidden sm:inline text-sm font-medium text-ink-soft hover:text-ink">
-          {user ? 'Dashboard' : 'Login'}
-        </button>
-        <button onClick={handleAuthClick} className="inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:bg-primary-deep transition-colors">
-          {user ? 'Go to Dashboard' : 'Try KhataLens'}
+        <a href="/login" className="hidden sm:inline text-sm font-medium text-ink-soft hover:text-ink">Login</a>
+        <a href="/login" className="inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:bg-primary-deep transition-colors">
+          Try KhataLens
           <ArrowRight className="size-4" />
-        </button>
+        </a>
       </div>
     </div>
   </header>
@@ -504,19 +489,7 @@ const Testimonials = () => {
   );
 };
 
-const FinalCTA = () => {
-  const { user, signInWithGoogle } = useAuth();
-  const navigate = useNavigate();
-
-  const handleCTAClick = () => {
-    if (user) {
-      navigate('/dashboard');
-    } else {
-      signInWithGoogle();
-    }
-  };
-
-  return (
+const FinalCTA = () => (
   <section id="cta" className="relative py-32 bg-primary text-primary-foreground overflow-hidden">
     <div className="absolute inset-0 bg-grid-dark opacity-50" />
     <div className="absolute inset-0 grid place-items-center pointer-events-none select-none">
@@ -531,19 +504,23 @@ const FinalCTA = () => {
         <p className="mt-8 max-w-2xl mx-auto text-lg sm:text-xl md:text-2xl text-primary-foreground/90 font-medium">
           KhataLens is not replacing bookkeeping apps. It is the AI bridge that gets small businesses into them.
         </p>
-        <div className="mt-12">
+        <form className="mt-12 mx-auto max-w-xl flex flex-col sm:flex-row gap-3">
+          <input
+            type="email"
+            placeholder="you@business.com"
+            className="flex-1 h-14 px-5 bg-background text-ink border border-background rounded-md text-base placeholder:text-ink-soft/60 focus:outline-none"
+          />
           <button
-            onClick={handleCTAClick}
-            className="h-14 px-10 font-display uppercase text-lg bg-background text-ink rounded-md hover:bg-ink hover:text-background transition-all hover:scale-[1.03] shadow-xl"
+            type="submit"
+            className="h-14 px-7 font-display uppercase text-lg bg-primary-darker text-background rounded-md hover:bg-ink transition-all hover:scale-[1.03] shadow-xl"
           >
-            {user ? 'Go to Dashboard →' : 'Get Started with Google →'}
+            Try KhataLens →
           </button>
-        </div>
+        </form>
       </Reveal>
     </div>
   </section>
-  );
-};
+);
 
 const Footer = () => (
   <footer className="bg-primary-darker text-background/70 border-t border-background/10">
