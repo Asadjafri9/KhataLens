@@ -53,7 +53,12 @@ const Header = () => {
 const Hero = () => (
   <section className="relative pt-36 pb-28 bg-grid overflow-hidden">
     <div className="absolute inset-0 bg-gradient-to-b from-background/0 via-background/30 to-background pointer-events-none" />
+    {/* Floating 3D cube — top-right of hero */}
+    <div className="pointer-events-none absolute right-2 sm:right-6 md:right-10 top-24 md:top-28 w-[180px] sm:w-[240px] md:w-[320px] lg:w-[380px] z-10 opacity-90">
+      <BrandedRubiksCube />
+    </div>
     <div className="container relative">
+
       <Reveal className="flex justify-center">
         <span className="inline-flex items-center gap-2 border border-border-strong bg-background/60 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-ink-soft rounded-full">
           <span className="size-1.5 rounded-full bg-primary animate-pulse" />
