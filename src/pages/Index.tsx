@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 const Logo = () => (
   <a href="#" className="block">
-    <img src="/logo.jpg" alt="KhataLens" className="h-10 sm:h-12 w-auto" />
+    <img src="/khatalens-logo.png" alt="KhataLens" className="h-10 sm:h-12 w-auto" />
   </a>
 );
 
