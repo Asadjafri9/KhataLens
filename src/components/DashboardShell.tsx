@@ -78,7 +78,7 @@ export function DashboardShell({ title, subtitle, actions, children }: Dashboard
 
               <div className="relative flex w-full items-center justify-center">
                 <Link
-                  to="/"
+                  to="/customer"
                   className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary-foreground/25 bg-background/95 shadow-[inset_0_1px_0_hsl(var(--primary)/0.10),0_8px_20px_hsl(var(--primary-darker)/0.28)]"
                 >
                   <img src="/khatalens-logo.png" alt="KhataLens" className="h-10 w-10 object-contain" />

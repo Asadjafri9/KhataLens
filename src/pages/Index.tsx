@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
 import { ArrowRight, Check, X, Camera, Brain, MessageSquare, BarChart3, Eye, ScanLine, Star, BookOpen, Send } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { ScribbleUnderline } from "@/components/ScribbleUnderline";
@@ -40,10 +41,15 @@ const Header = () => {
       </nav>
       <div className="flex items-center gap-3">
         <a href="/login" className="hidden sm:inline text-sm font-medium text-ink-soft hover:text-ink">Login</a>
-        <a href="/login" className="inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold hover:bg-primary-deep transition-colors">
+        <motion.a 
+          whileHover={{ scale: 1.05, y: -1 }}
+          whileTap={{ scale: 0.95 }}
+          href="/login" 
+          className="inline-flex items-center gap-2 rounded-full bg-primary text-primary-foreground px-5 py-2.5 text-sm font-semibold transition-all shadow-md hover:shadow-lg hover:shadow-primary/20"
+        >
           Try KhataLens
           <ArrowRight className="size-4" />
-        </a>
+        </motion.a>
       </div>
     </div>
   </header>
@@ -510,12 +516,14 @@ const FinalCTA = () => (
             placeholder="you@business.com"
             className="flex-1 h-14 px-5 bg-background text-ink border border-background rounded-md text-base placeholder:text-ink-soft/60 focus:outline-none"
           />
-          <button
+          <motion.button
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.98 }}
             type="submit"
-            className="h-14 px-7 font-display uppercase text-lg bg-primary-darker text-background rounded-md hover:bg-ink transition-all hover:scale-[1.03] shadow-xl"
+            className="h-14 px-7 font-display uppercase text-lg bg-primary-darker text-background rounded-md transition-all shadow-xl"
           >
             Try KhataLens →
-          </button>
+          </motion.button>
         </form>
       </Reveal>
     </div>
