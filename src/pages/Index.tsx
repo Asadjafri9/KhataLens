@@ -526,9 +526,7 @@ const Footer = () => (
   <footer className="bg-primary-darker text-background/70 border-t border-background/10">
     <div className="container py-16 grid md:grid-cols-4 gap-10">
       <div>
-        <div className="font-display text-3xl uppercase text-background">
-          <img src="/logo.jpg" alt="KhataLens" className="h-10 w-auto brightness-0 invert" />
-        </div>
+        <img src="/Logo.png" alt="KhataLens" className="h-10 w-auto" />
         <p className="mt-4 text-sm max-w-xs">AI-powered paper-to-ledger assistant for Pakistan's small businesses. From paper chaos to digital control.</p>
       </div>
       {[
