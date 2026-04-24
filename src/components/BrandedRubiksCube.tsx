@@ -306,9 +306,9 @@ export default function BrandedRubiksCube({
           <pointLight position={[10, 10, 10]} intensity={1.5} color={COLORS.burgundy} />
           <pointLight position={[-10, -10, -10]} intensity={0.5} color={COLORS.grayLight} />
           <spotLight position={[0, 5, 0]} intensity={1} angle={0.5} penumbra={1} />
-          <CubeModel 
-            playIntro={playIntro} 
-            onIntroComplete={onIntroComplete} 
+          <CubeModel
+            playIntro={playIntro}
+            onIntroComplete={onIntroComplete}
             variant={variant}
             scrollTriggerEl={scrollTriggerEl}
           />
