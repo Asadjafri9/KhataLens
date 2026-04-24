@@ -1,3 +1,16 @@
+# Production
+dist
+dist-ssr
+*.local
+
+# Dependencies
+node_modules
+.pnp
+.pnp.js
+
+# Testing
+coverage
+
 # Logs
 logs
 *.log
@@ -6,11 +19,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
-node_modules
-dist
-dist-ssr
-*.local
 
 # Editor directories and files
 .vscode/*
@@ -22,8 +30,21 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.classpath
+.project
+.settings
+.factorypath
 
-# Security
+# Security & Secrets
 .env
 .env.local
 .env.*.local
+*.p12
+*.pem
+*.key
+.node_repl_history
+
+# Varies
+.eslintcache
+.stylelintcache
+.vite-inspect
