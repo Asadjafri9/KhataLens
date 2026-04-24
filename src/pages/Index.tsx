@@ -3,6 +3,7 @@ import { ArrowRight, Check, X, Zap, Layers, Sparkles, BarChart3, Users, Lock, St
 import { Reveal } from "@/components/Reveal";
 import { ScribbleUnderline } from "@/components/ScribbleUnderline";
 import { RevealText } from "@/components/RevealText";
+import { FlipCard } from "@/components/FlipCard";
 import { cn } from "@/lib/utils";
 
 const Logo = () => (
@@ -241,71 +242,150 @@ const Bento = () => (
       </Reveal>
 
       <div className="mt-16 grid grid-cols-1 md:grid-cols-3 auto-rows-[minmax(360px,auto)] gap-5">
-        <FeatureCard className="md:col-span-2 bg-primary-darker text-background">
-          <Zap className="size-8 text-primary" />
-          <h3 className="mt-6 font-display text-3xl uppercase">Realtime Sprint canvas</h3>
-          <p className="mt-3 text-background/70 max-w-md">A live, opinionated board where work moves itself as code, design and decisions land.</p>
-          <div className="mt-8 grid grid-cols-3 gap-2">
-            {[...Array(9)].map((_,i) => (
-              <div key={i} className={`h-10 rounded ${i%3===0?'bg-primary':'bg-background/10'} ${i%2===0?'animate-pulse-soft':''}`} style={{animationDelay:`${i*120}ms`}} />
-            ))}
-          </div>
-        </FeatureCard>
+        <FlipCard
+          variant="dark"
+          className="md:col-span-2 min-h-[360px]"
+          front={
+            <>
+              <Zap className="size-8 text-primary" />
+              <h3 className="mt-6 font-display text-3xl uppercase">Realtime Sprint canvas</h3>
+              <p className="mt-3 text-background/70 max-w-md">A live, opinionated board where work moves itself as code, design and decisions land.</p>
+              <div className="mt-8 grid grid-cols-3 gap-2">
+                {[...Array(9)].map((_, i) => (
+                  <div key={i} className={`h-10 rounded ${i % 3 === 0 ? 'bg-primary' : 'bg-background/10'} ${i % 2 === 0 ? 'animate-pulse-soft' : ''}`} style={{ animationDelay: `${i * 120}ms` }} />
+                ))}
+              </div>
+              <div className="mt-auto pt-6 text-[10px] uppercase tracking-[0.25em] text-background/50">Hover to flip →</div>
+            </>
+          }
+          back={
+            <>
+              <div className="text-[11px] uppercase tracking-[0.25em] text-primary font-bold">How it works</div>
+              <h3 className="mt-4 font-display text-3xl uppercase">Zero-friction flow</h3>
+              <p className="mt-3 text-ink-soft">Every PR, design and doc auto-snaps into the canvas. No drag-and-drop tax. No status meetings.</p>
+              <ul className="mt-6 space-y-2 text-sm text-ink-soft">
+                <li className="flex gap-2"><Check className="size-4 mt-0.5 text-primary" strokeWidth={3} />Live PR + issue sync</li>
+                <li className="flex gap-2"><Check className="size-4 mt-0.5 text-primary" strokeWidth={3} />Auto-grouped by sprint</li>
+                <li className="flex gap-2"><Check className="size-4 mt-0.5 text-primary" strokeWidth={3} />Inline review threads</li>
+              </ul>
+            </>
+          }
+        />
 
-        <FeatureCard>
-          <Layers className="size-8 text-primary" />
-          <h3 className="mt-6 font-display text-3xl uppercase">Stacked roadmaps</h3>
-          <p className="mt-3 text-ink-soft">Tie strategy to commits without spreadsheets.</p>
-          <div className="mt-6 space-y-2">
-            <div className="h-3 bg-primary/80 rounded-full w-5/6" />
-            <div className="h-3 bg-primary/50 rounded-full w-3/5" />
-            <div className="h-3 bg-primary/20 rounded-full w-4/6" />
-          </div>
-        </FeatureCard>
+        <FlipCard
+          className="min-h-[360px]"
+          front={
+            <>
+              <Layers className="size-8 text-primary" />
+              <h3 className="mt-6 font-display text-3xl uppercase">Stacked roadmaps</h3>
+              <p className="mt-3 text-ink-soft">Tie strategy to commits without spreadsheets.</p>
+              <div className="mt-6 space-y-2">
+                <div className="h-3 bg-primary/80 rounded-full w-5/6" />
+                <div className="h-3 bg-primary/50 rounded-full w-3/5" />
+                <div className="h-3 bg-primary/20 rounded-full w-4/6" />
+              </div>
+            </>
+          }
+          back={
+            <>
+              <div className="text-[11px] uppercase tracking-[0.25em] font-bold opacity-80">Roadmaps</div>
+              <h3 className="mt-4 font-display text-3xl uppercase">From vision to PR</h3>
+              <p className="mt-3 opacity-90">Stack initiatives across quarters. Each card stays linked to live work.</p>
+            </>
+          }
+        />
 
-        <FeatureCard>
-          <Sparkles className="size-8 text-primary" />
-          <h3 className="mt-6 font-display text-3xl uppercase">AI standups</h3>
-          <p className="mt-3 text-ink-soft">Auto-generated daily summaries from real activity.</p>
-          <div className="mt-6 bg-ink text-background rounded p-4 text-xs font-mono leading-relaxed">
-            <div className="text-primary/80">&gt; flux summary --today</div>
-            <div className="opacity-70">3 PRs merged · 12 issues closed</div>
-            <div className="opacity-70">2 blockers flagged · 1 launch ready</div>
-          </div>
-        </FeatureCard>
+        <FlipCard
+          className="min-h-[360px]"
+          front={
+            <>
+              <Sparkles className="size-8 text-primary" />
+              <h3 className="mt-6 font-display text-3xl uppercase">AI standups</h3>
+              <p className="mt-3 text-ink-soft">Auto-generated daily summaries from real activity.</p>
+              <div className="mt-6 bg-ink text-background rounded p-4 text-xs font-mono leading-relaxed">
+                <div className="text-primary/80">&gt; flux summary --today</div>
+                <div className="opacity-70">3 PRs merged · 12 issues closed</div>
+                <div className="opacity-70">2 blockers flagged · 1 launch ready</div>
+              </div>
+            </>
+          }
+          back={
+            <>
+              <div className="text-[11px] uppercase tracking-[0.25em] font-bold opacity-80">AI</div>
+              <h3 className="mt-4 font-display text-3xl uppercase">Skip the sync</h3>
+              <p className="mt-3 opacity-90">Delivered to Slack at 9am. Surfaces blockers before they become Jira tickets.</p>
+            </>
+          }
+        />
 
-        <FeatureCard className="md:col-span-2">
-          <BarChart3 className="size-8 text-primary" />
-          <h3 className="mt-6 font-display text-3xl uppercase">Cycle insights</h3>
-          <p className="mt-3 text-ink-soft max-w-md">See where work stalls — across squads, repos, and quarters — without building a single dashboard.</p>
-          <div className="mt-8 flex items-end gap-2 h-28">
-            {[40,72,55,90,65,88,76,95,60,82].map((h,i)=>(
-              <div key={i} className="flex-1 bg-primary/80 rounded-t" style={{height:`${h}%`}} />
-            ))}
-          </div>
-        </FeatureCard>
+        <FlipCard
+          className="md:col-span-2 min-h-[360px]"
+          front={
+            <>
+              <BarChart3 className="size-8 text-primary" />
+              <h3 className="mt-6 font-display text-3xl uppercase">Cycle insights</h3>
+              <p className="mt-3 text-ink-soft max-w-md">See where work stalls — across squads, repos, and quarters — without building a single dashboard.</p>
+              <div className="mt-8 flex items-end gap-2 h-28">
+                {[40, 72, 55, 90, 65, 88, 76, 95, 60, 82].map((h, i) => (
+                  <div key={i} className="flex-1 bg-primary/80 rounded-t" style={{ height: `${h}%` }} />
+                ))}
+              </div>
+            </>
+          }
+          back={
+            <>
+              <div className="text-[11px] uppercase tracking-[0.25em] font-bold opacity-80">Insights</div>
+              <h3 className="mt-4 font-display text-3xl uppercase">Spot the bottleneck</h3>
+              <p className="mt-3 opacity-90 max-w-md">Cycle time, throughput, review latency — already computed. No SQL, no BI tool, no rituals.</p>
+            </>
+          }
+        />
 
-        <FeatureCard>
-          <Users className="size-8 text-primary" />
-          <h3 className="mt-6 font-display text-3xl uppercase">Squad rooms</h3>
-          <p className="mt-3 text-ink-soft">Async-first spaces with the context already loaded.</p>
-          <div className="mt-6 flex -space-x-2">
-            {["JM","AK","RT","ED","LO"].map((n,i)=>(
-              <div key={n} className={`size-10 rounded-full grid place-items-center text-xs font-bold border-2 border-card ${i%2?'bg-primary text-primary-foreground':'bg-ink text-background'}`}>{n}</div>
-            ))}
-          </div>
-        </FeatureCard>
+        <FlipCard
+          className="min-h-[360px]"
+          front={
+            <>
+              <Users className="size-8 text-primary" />
+              <h3 className="mt-6 font-display text-3xl uppercase">Squad rooms</h3>
+              <p className="mt-3 text-ink-soft">Async-first spaces with the context already loaded.</p>
+              <div className="mt-6 flex -space-x-2">
+                {["JM", "AK", "RT", "ED", "LO"].map((n, i) => (
+                  <div key={n} className={`size-10 rounded-full grid place-items-center text-xs font-bold border-2 border-card ${i % 2 ? 'bg-primary text-primary-foreground' : 'bg-ink text-background'}`}>{n}</div>
+                ))}
+              </div>
+            </>
+          }
+          back={
+            <>
+              <div className="text-[11px] uppercase tracking-[0.25em] font-bold opacity-80">Squads</div>
+              <h3 className="mt-4 font-display text-3xl uppercase">Context, preloaded</h3>
+              <p className="mt-3 opacity-90">Every room ships with the right docs, PRs and decisions pinned. New hires onboard themselves.</p>
+            </>
+          }
+        />
 
-        <FeatureCard>
-          <Lock className="size-8 text-primary" />
-          <h3 className="mt-6 font-display text-3xl uppercase">Enterprise grade</h3>
-          <p className="mt-3 text-ink-soft">SOC2, SAML SSO, audit logs, EU residency.</p>
-          <div className="mt-6 flex flex-wrap gap-2">
-            {["SOC2","SSO","SCIM","GDPR"].map(t=>(
-              <span key={t} className="text-[10px] uppercase tracking-widest font-bold border border-border px-2 py-1 text-ink-soft">{t}</span>
-            ))}
-          </div>
-        </FeatureCard>
+        <FlipCard
+          className="min-h-[360px]"
+          front={
+            <>
+              <Lock className="size-8 text-primary" />
+              <h3 className="mt-6 font-display text-3xl uppercase">Enterprise grade</h3>
+              <p className="mt-3 text-ink-soft">SOC2, SAML SSO, audit logs, EU residency.</p>
+              <div className="mt-6 flex flex-wrap gap-2">
+                {["SOC2", "SSO", "SCIM", "GDPR"].map(t => (
+                  <span key={t} className="text-[10px] uppercase tracking-widest font-bold border border-border px-2 py-1 text-ink-soft">{t}</span>
+                ))}
+              </div>
+            </>
+          }
+          back={
+            <>
+              <div className="text-[11px] uppercase tracking-[0.25em] font-bold opacity-80">Security</div>
+              <h3 className="mt-4 font-display text-3xl uppercase">Built for IT</h3>
+              <p className="mt-3 opacity-90">SCIM provisioning, granular audit logs, regional data residency. Your security team will actually like us.</p>
+            </>
+          }
+        />
       </div>
     </div>
   </section>
