@@ -173,5 +173,41 @@ def get_transactions(customer_id: str):
     conn.close()
     return [dict(t) for t in txs]
 
+@app.delete("/api/customers/all")
+def delete_all_customers():
+    conn = get_db()
+    try:
+        conn.execute("DELETE FROM transactions")
+        conn.execute("DELETE FROM customers")
+        conn.commit()
+        return {"status": "success", "message": "All customers and transactions deleted"}
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
+@app.delete("/api/customers/{customer_id}")
+def delete_customer(customer_id: str):
+    conn = get_db()
+    try:
+        # Check customer exists
+        existing = conn.execute("SELECT id FROM customers WHERE id = ?", (customer_id,)).fetchone()
+        if not existing:
+            raise HTTPException(status_code=404, detail="Customer not found")
+        
+        # Delete transactions first (foreign key), then customer
+        conn.execute("DELETE FROM transactions WHERE customer_id = ?", (customer_id,))
+        conn.execute("DELETE FROM customers WHERE id = ?", (customer_id,))
+        conn.commit()
+        return {"status": "success", "message": "Customer deleted"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
 if __name__ == "__main__":
     uvicorn.run("api:app", host="0.0.0.0", port=8000, reload=True)
