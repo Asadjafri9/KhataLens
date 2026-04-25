@@ -355,5 +355,86 @@ def delete_customer(customer_id: str):
     finally:
         conn.close()
 
+import requests
+
+@app.post("/api/chat")
+def chat_bot(data: dict):
+    user_message = data.get("userMessage", "")
+    history = data.get("messages", [])
+    
+    try:
+        # Build RAG Context by calling our existing analytics function
+        stats = get_analytics()
+        
+        # Get top 10 customers to provide detailed context
+        conn = get_db()
+        customers = conn.execute("SELECT name, phone, balance FROM customers ORDER BY balance DESC LIMIT 15").fetchall()
+        conn.close()
+        
+        cust_list = "\n".join([f"- {c['name']} (Phone: {c['phone']}): Rs. {c['balance']}" for c in customers])
+        
+        context_str = f"""
+        Total Customers: {stats['customerCount']}
+        Total Pending Recovery: Rs. {stats['openBalance']}
+        Paid Off Customers: {stats['paidCount']}
+        
+        Customer Balances (Top 15 Debtors):
+        {cust_list}
+        """
+        
+        # Prepare messages for OpenRouter
+        messages = [
+            {
+                "role": "system",
+                "content": f"""You are KhataLens AI, a specialized financial assistant for shopkeepers in Pakistan.
+You help them manage their digital ledger (Khata).
+
+CONTEXT DATA FROM DATABASE:
+{context_str}
+
+INSTRUCTIONS:
+- Answer questions based ONLY on the provided CONTEXT DATA.
+- If asked about a customer's balance, look at the Customer Balances list. If they are not in the list, politely say you don't have their specific record right now.
+- If asked to draft a payment reminder, provide it in both English and polite Roman Urdu.
+- Be concise, helpful, and professional."""
+            }
+        ]
+        
+        # Append history
+        for msg in history:
+            if msg.get("role") in ["user", "assistant"]:
+                messages.append({"role": msg["role"], "content": msg["content"]})
+            
+        # Append the new user message
+        messages.append({"role": "user", "content": user_message})
+        
+        # Call OpenRouter API
+        api_key = os.getenv("OPENROUTER_API_KEY")
+        if not api_key:
+            raise HTTPException(status_code=500, detail="OPENROUTER_API_KEY not configured")
+            
+        response = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": "google/gemini-2.0-flash-001",
+                "messages": messages,
+                "temperature": 0.7
+            }
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            reply = result["choices"][0]["message"]["content"]
+            return {"reply": reply}
+        else:
+            raise HTTPException(status_code=500, detail=f"AI API Error: {response.text}")
+            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 if __name__ == "__main__":
     uvicorn.run("api:app", host="0.0.0.0", port=8000, reload=True)

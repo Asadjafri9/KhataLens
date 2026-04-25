@@ -25,25 +25,6 @@ export default function ChatBot() {
     }
   }, [messages, isLoading]);
 
-  const fetchLedgerContext = async () => {
-    try {
-      const statsRes = await fetch("http://localhost:8000/api/stats");
-      const custRes = await fetch("http://localhost:8000/api/customers");
-      
-      const stats = await statsRes.json();
-      const customers = await custRes.json();
-      
-      const topDebtors = customers.slice(0, 5).map((c: any) => `${c.name}: Rs. ${c.balance}`).join(", ");
-      
-      return `Total Customers: ${stats.activeCustomers}. 
-              Total Pending Recovery: Rs. ${stats.totalBalance}. 
-              Top Debtors: ${topDebtors}.`;
-    } catch (error) {
-      console.error("Context fetch error:", error);
-      return "Ledger data currently unavailable.";
-    }
-  };
-
   const handleSendMessage = async (text?: string) => {
     const messageText = text || input;
     if (!messageText.trim() || isLoading) return;
@@ -54,60 +35,24 @@ export default function ChatBot() {
     setIsLoading(true);
 
     try {
-      const contextData = await fetchLedgerContext();
-
-      // Using the working OCR key for the chatbot to ensure active quota
-      const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${import.meta.env.VITE_GOOGLE_API_KEY}`, {
+      const response = await fetch("http://localhost:8000/api/chat", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          contents: [
-            {
-              role: "user",
-              parts: [
-                {
-                  text: `You are KhataLens AI, a specialized assistant for shopkeepers in Pakistan. 
-                  You help them manage their digital ledger (Khata). 
-                  
-                  CONTEXT DATA:
-                  ${contextData}
-                  
-                  INSTRUCTIONS:
-                  - Answer questions based on the provided CONTEXT DATA.
-                  - If a customer's balance is asked, use the context.
-                  - If asked to draft a reminder, provide it in both English and Urdu (Roman Urdu is fine).
-                  - Keep answers concise and helpful.
-                  - If the data is not in the context, politely say you don't have that specific record.
-                  
-                  PREVIOUS CONVERSATION:
-                  ${messages.map(m => `${m.role}: ${m.content}`).join("\n")}
-                  
-                  USER QUERY:
-                  ${messageText}`
-                }
-              ]
-            }
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 800,
-          }
+          messages: messages,
+          userMessage: messageText
         })
       });
 
       const data = await response.json();
       
-      if (data.error) {
-        throw new Error(data.error.message || "Gemini API Error");
+      if (!response.ok) {
+        throw new Error(data.detail || "Failed to get AI response");
       }
-
-      const assistantContent = data.candidates?.[0]?.content?.parts?.[0]?.text || "I couldn't process that request.";
 
       const assistantMessage: Message = { 
         role: "assistant", 
-        content: assistantContent
+        content: data.reply
       };
       
       setMessages(prev => [...prev, assistantMessage]);
