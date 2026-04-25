@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { ArrowRight, ChevronDown, ChevronUp, Clock, Phone, Search, TrendingUp, Users, Trash2, AlertTriangle, Banknote, X, Pencil, Info } from "lucide-react";
 import { Link } from "react-router-dom";
 import { DashboardShell } from "@/components/DashboardShell";
@@ -504,8 +505,8 @@ export default function Customer() {
       </AlertDialog>
 
       {/* ── Edit Customer Modal ── */}
-      {editCustomer && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+      {editCustomer && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
           <div className="w-full max-w-md rounded-3xl border border-border bg-background shadow-2xl overflow-hidden">
             <div className="flex items-center justify-between border-b border-border px-6 py-5">
               <div>
@@ -538,13 +539,14 @@ export default function Customer() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ── Info / Full History Modal ── */}
-      {infoCustomer && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm p-4 pt-16 sm:pt-24 overflow-y-auto">
-          <div className="w-full max-w-lg rounded-3xl border border-border bg-background shadow-2xl overflow-hidden flex flex-col mb-16">
+      {infoCustomer && createPortal(
+        <div className="fixed inset-0 z-[100] flex items-start justify-center bg-black/40 backdrop-blur-sm p-4 pt-12 sm:pt-20 overflow-y-auto">
+          <div className="w-full max-w-lg rounded-3xl border border-border bg-background shadow-2xl overflow-hidden flex flex-col my-auto max-h-[85vh]">
             {/* Header */}
             <div className="flex items-start justify-between border-b border-border px-6 py-5 shrink-0">
               <div>
@@ -610,7 +612,8 @@ export default function Customer() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </DashboardShell>
   );

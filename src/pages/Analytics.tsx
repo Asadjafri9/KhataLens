@@ -198,54 +198,52 @@ export default function Analytics() {
           </div>
 
           {/* ── Insights ── */}
-          <div className="rounded-[30px] border border-border bg-gradient-to-br from-primary-darker to-[#0F172A] p-6 text-primary-foreground shadow-lg shadow-primary/10">
-            <div className="flex items-center gap-2">
-              <span className="flex size-6 items-center justify-center rounded-full bg-primary-foreground/10">
-                <TrendingUp className="size-3 text-primary-foreground" />
-              </span>
-              <div className="text-[11px] font-semibold uppercase tracking-[0.25em] text-primary-foreground/75">Insights</div>
-            </div>
-            <h3 className="mt-4 font-display text-2xl text-primary-foreground">Your Ledger Summary</h3>
+          <div className="rounded-[30px] border border-primary/30 bg-[linear-gradient(180deg,hsl(var(--primary-darker))_0%,hsl(353_74%_14%)_100%)] p-6 sm:p-8 text-primary-foreground shadow-[0_20px_60px_hsl(var(--primary)/0.24)]">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.25em] text-primary-foreground/75">Insights</div>
+            <h3 className="mt-2 font-display text-2xl sm:text-3xl text-primary-foreground">Your Ledger Summary</h3>
             
-            <div className="mt-6 grid gap-4 sm:grid-cols-3">
+            <div className="mt-6 space-y-3">
               {data!.customerCount === 0 ? (
-                <div className="col-span-3 rounded-2xl bg-white/5 border border-white/10 p-4 text-sm text-primary-foreground/80">
+                <div className="rounded-2xl bg-white/5 border border-white/10 p-4 text-sm text-primary-foreground/80">
                   No data yet — import your first khata sheet to see insights here.
                 </div>
               ) : (
                 <>
-                  <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
-                    <div className="flex items-center gap-2 text-primary-foreground/75 mb-2">
-                      <Users className="size-4" />
-                      <span className="text-xs font-semibold uppercase tracking-[0.2em]">Customer Base</span>
+                  <div className="rounded-2xl bg-white/5 border border-white/10 p-4 flex items-start gap-4 hover:bg-white/10 transition-colors">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-xl shadow-inner">👥</div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Customer Base</h4>
+                      <p className="mt-1 text-sm leading-relaxed text-primary-foreground/80">
+                        You have <strong>{data!.customerCount}</strong> customer{data!.customerCount !== 1 ? "s" : ""} in total.{" "}
+                        <strong className="text-white">{data!.pendingCount}</strong> still have an outstanding balance.
+                      </p>
                     </div>
-                    <div className="text-sm leading-relaxed text-primary-foreground/90">
-                      You have <strong className="text-white">{data!.customerCount}</strong> customers. <strong className="text-white">{data!.pendingCount}</strong> still have an outstanding balance.
+                  </div>
+                  
+                  <div className="rounded-2xl bg-white/5 border border-white/10 p-4 flex items-start gap-4 hover:bg-white/10 transition-colors">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-xl shadow-inner">💰</div>
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Credit Overview</h4>
+                      <p className="mt-1 text-sm leading-relaxed text-primary-foreground/80">
+                        Total credit extended: <strong>{fmt(data!.totalCredit)}</strong>.
+                        Current open balance: <strong className="text-white">{fmt(data!.openBalance)}</strong>.
+                      </p>
                     </div>
                   </div>
 
-                  <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
-                    <div className="flex items-center gap-2 text-primary-foreground/75 mb-2">
-                      <DollarSign className="size-4" />
-                      <span className="text-xs font-semibold uppercase tracking-[0.2em]">Financial Health</span>
+                  <div className="rounded-2xl bg-white/5 border border-white/10 p-4 flex items-start gap-4 hover:bg-white/10 transition-colors">
+                    <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-white/10 text-xl shadow-inner">
+                      {overdueRate > 50 ? "⚠️" : overdueRate > 0 ? "✅" : "🎉"}
                     </div>
-                    <div className="text-sm leading-relaxed text-primary-foreground/90">
-                      Total credit: <strong className="text-white">{fmt(data!.totalCredit)}</strong>.<br />
-                      Open balance: <strong className="text-white">{fmt(data!.openBalance)}</strong>.
-                    </div>
-                  </div>
-
-                  <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
-                    <div className="flex items-center gap-2 text-primary-foreground/75 mb-2">
-                      <BarChart3 className="size-4" />
-                      <span className="text-xs font-semibold uppercase tracking-[0.2em]">Actionable Tip</span>
-                    </div>
-                    <div className="text-sm leading-relaxed text-primary-foreground/90">
-                      {overdueRate > 50 
-                        ? <><span className="text-amber-400">⚠️ Action needed:</span> More than half your customers owe money. Consider sending reminders.</>
-                        : overdueRate > 0 
-                        ? <><span className="text-emerald-400">✅ Good standing:</span> {100 - overdueRate}% of your customers are fully paid off. Keep it up!</>
-                        : <><span className="text-emerald-400">🎉 Perfect:</span> All customers are fully paid off. Your ledger is completely clean!</>}
+                    <div>
+                      <h4 className="text-sm font-semibold text-white">Health Status</h4>
+                      <p className="mt-1 text-sm leading-relaxed text-primary-foreground/80">
+                        {overdueRate > 50 
+                          ? "More than half your customers still owe money. Consider sending reminders via the Chat Bot."
+                          : overdueRate > 0 
+                            ? `${100 - overdueRate}% of your customers are fully paid off. Keep it up!`
+                            : "All customers are fully paid off. Your ledger is perfectly clean!"}
+                      </p>
                     </div>
                   </div>
                 </>
