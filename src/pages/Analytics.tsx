@@ -198,29 +198,56 @@ export default function Analytics() {
           </div>
 
           {/* ── Insights ── */}
-          <div className="rounded-[30px] border border-border bg-primary-darker p-6 text-primary-foreground shadow-lg shadow-primary/10">
-            <div className="text-[11px] font-semibold uppercase tracking-[0.25em] text-primary-foreground/75">Insights</div>
-            <h3 className="mt-2 font-display text-2xl text-primary-foreground">Your Ledger Summary</h3>
-            <div className="mt-4 space-y-3 text-sm leading-relaxed text-primary-foreground/84">
+          <div className="rounded-[30px] border border-border bg-gradient-to-br from-primary-darker to-[#0F172A] p-6 text-primary-foreground shadow-lg shadow-primary/10">
+            <div className="flex items-center gap-2">
+              <span className="flex size-6 items-center justify-center rounded-full bg-primary-foreground/10">
+                <TrendingUp className="size-3 text-primary-foreground" />
+              </span>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.25em] text-primary-foreground/75">Insights</div>
+            </div>
+            <h3 className="mt-4 font-display text-2xl text-primary-foreground">Your Ledger Summary</h3>
+            
+            <div className="mt-6 grid gap-4 sm:grid-cols-3">
               {data!.customerCount === 0 ? (
-                <p>No data yet — import your first khata sheet to see insights here.</p>
+                <div className="col-span-3 rounded-2xl bg-white/5 border border-white/10 p-4 text-sm text-primary-foreground/80">
+                  No data yet — import your first khata sheet to see insights here.
+                </div>
               ) : (
                 <>
-                  <p>
-                    You have <strong>{data!.customerCount}</strong> customer{data!.customerCount !== 1 ? "s" : ""} in total.{" "}
-                    <strong>{data!.pendingCount}</strong> still have an outstanding balance.
-                  </p>
-                  <p>
-                    Total credit extended: <strong>{fmt(data!.totalCredit)}</strong>.
-                    Current open balance: <strong>{fmt(data!.openBalance)}</strong>.
-                  </p>
-                  {overdueRate > 50 ? (
-                    <p>⚠️ More than half your customers still owe money. Consider sending reminders via the Chat Bot.</p>
-                  ) : overdueRate > 0 ? (
-                    <p>✅ {100 - overdueRate}% of your customers are fully paid off. Keep it up!</p>
-                  ) : (
-                    <p>🎉 All customers are fully paid off. Your ledger is clean!</p>
-                  )}
+                  <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
+                    <div className="flex items-center gap-2 text-primary-foreground/75 mb-2">
+                      <Users className="size-4" />
+                      <span className="text-xs font-semibold uppercase tracking-[0.2em]">Customer Base</span>
+                    </div>
+                    <div className="text-sm leading-relaxed text-primary-foreground/90">
+                      You have <strong className="text-white">{data!.customerCount}</strong> customers. <strong className="text-white">{data!.pendingCount}</strong> still have an outstanding balance.
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
+                    <div className="flex items-center gap-2 text-primary-foreground/75 mb-2">
+                      <DollarSign className="size-4" />
+                      <span className="text-xs font-semibold uppercase tracking-[0.2em]">Financial Health</span>
+                    </div>
+                    <div className="text-sm leading-relaxed text-primary-foreground/90">
+                      Total credit: <strong className="text-white">{fmt(data!.totalCredit)}</strong>.<br />
+                      Open balance: <strong className="text-white">{fmt(data!.openBalance)}</strong>.
+                    </div>
+                  </div>
+
+                  <div className="rounded-2xl bg-white/5 border border-white/10 p-4">
+                    <div className="flex items-center gap-2 text-primary-foreground/75 mb-2">
+                      <BarChart3 className="size-4" />
+                      <span className="text-xs font-semibold uppercase tracking-[0.2em]">Actionable Tip</span>
+                    </div>
+                    <div className="text-sm leading-relaxed text-primary-foreground/90">
+                      {overdueRate > 50 
+                        ? <><span className="text-amber-400">⚠️ Action needed:</span> More than half your customers owe money. Consider sending reminders.</>
+                        : overdueRate > 0 
+                        ? <><span className="text-emerald-400">✅ Good standing:</span> {100 - overdueRate}% of your customers are fully paid off. Keep it up!</>
+                        : <><span className="text-emerald-400">🎉 Perfect:</span> All customers are fully paid off. Your ledger is completely clean!</>}
+                    </div>
+                  </div>
                 </>
               )}
             </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowRight, ChevronDown, ChevronUp, Clock, Phone, Search, TrendingUp, Users, Trash2, AlertTriangle, Banknote, X } from "lucide-react";
+import { ArrowRight, ChevronDown, ChevronUp, Clock, Phone, Search, TrendingUp, Users, Trash2, AlertTriangle, Banknote, X, Pencil, Info } from "lucide-react";
 import { Link } from "react-router-dom";
 import { DashboardShell } from "@/components/DashboardShell";
 import { toast } from "sonner";
@@ -46,6 +46,15 @@ export default function Customer() {
   const [paymentAmount, setPaymentAmount] = useState("");
   const [paymentNote, setPaymentNote] = useState("");
   const [submittingPayment, setSubmittingPayment] = useState(false);
+  // Edit state
+  const [editCustomer, setEditCustomer] = useState<Customer | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editBalance, setEditBalance] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+  // Info / full history modal
+  const [infoCustomer, setInfoCustomer] = useState<Customer | null>(null);
+  const [infoTransactions, setInfoTransactions] = useState<Transaction[]>([]);
 
   useEffect(() => {
     fetchCustomers();
@@ -170,6 +179,34 @@ export default function Customer() {
     }
   };
 
+  const openInfo = async (customer: Customer) => {
+    setInfoCustomer(customer);
+    try {
+      const res = await fetch(`http://localhost:8000/api/transactions/${customer.id}`);
+      const data = await res.json();
+      setInfoTransactions(data || []);
+    } catch { setInfoTransactions([]); }
+  };
+
+  const handleEditSave = async () => {
+    if (!editCustomer) return;
+    setSavingEdit(true);
+    try {
+      const res = await fetch(`http://localhost:8000/api/customers/${editCustomer.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: editName, phone: editPhone, balance: parseFloat(editBalance) })
+      });
+      if (!res.ok) throw new Error();
+      const updated = await res.json();
+      setCustomers(prev => prev.map(c => c.id === updated.id ? { ...c, name: updated.name, phone: updated.phone, balance: updated.balance } : c));
+      fetchStats();
+      toast.success("Customer updated");
+      setEditCustomer(null);
+    } catch { toast.error("Failed to update customer"); }
+    finally { setSavingEdit(false); }
+  };
+
   const formatDate = (dateString: string) => {
     if (!dateString) return "N/A";
     try {
@@ -283,11 +320,19 @@ export default function Customer() {
                       {formatDate(customer.last_activity)}
                     </div>
 
-                    {/* Expand toggle */}
-                    <div className="flex justify-end cursor-pointer" onClick={() => toggleExpand(customer.id)}>
-                      {expandedCustomerId === customer.id
-                        ? <ChevronUp className="size-5 text-primary" />
-                        : <ChevronDown className="size-5 text-ink-soft" />}
+                    {/* Action buttons: Info, Edit, Expand, Delete */}
+                    <div className="flex justify-end items-center gap-1">
+                      <button onClick={() => openInfo(customer)} title="Full history" className="flex size-8 items-center justify-center rounded-full border border-transparent text-ink-soft hover:border-primary/30 hover:bg-primary/5 hover:text-primary transition-all">
+                        <Info className="size-4" />
+                      </button>
+                      <button onClick={() => { setEditCustomer(customer); setEditName(customer.name); setEditPhone(customer.phone); setEditBalance(String(customer.balance)); }} title="Edit customer" className="flex size-8 items-center justify-center rounded-full border border-transparent text-ink-soft hover:border-amber-300 hover:bg-amber-50 hover:text-amber-600 transition-all">
+                        <Pencil className="size-4" />
+                      </button>
+                      <div className="cursor-pointer" onClick={() => toggleExpand(customer.id)}>
+                        {expandedCustomerId === customer.id
+                          ? <ChevronUp className="size-5 text-primary" />
+                          : <ChevronDown className="size-5 text-ink-soft" />}
+                      </div>
                     </div>
 
                     {/* Delete button */}
@@ -457,6 +502,116 @@ export default function Customer() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* ── Edit Customer Modal ── */}
+      {editCustomer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="w-full max-w-md rounded-3xl border border-border bg-background shadow-2xl overflow-hidden">
+            <div className="flex items-center justify-between border-b border-border px-6 py-5">
+              <div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.25em] text-primary">Edit Customer</div>
+                <h3 className="mt-1 font-display text-2xl text-ink">{editCustomer.name}</h3>
+              </div>
+              <button onClick={() => setEditCustomer(null)} className="flex size-9 items-center justify-center rounded-full border border-border text-ink-soft hover:bg-surface/50 transition-colors">
+                <X className="size-4" />
+              </button>
+            </div>
+            <div className="px-6 py-5 space-y-4">
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-soft">Customer Name</label>
+                <input value={editName} onChange={e => setEditName(e.target.value)} className="mt-1.5 w-full rounded-xl border border-border bg-surface/50 px-4 py-2.5 text-sm text-ink outline-none focus:border-primary" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-soft">Phone Number</label>
+                <input value={editPhone} onChange={e => setEditPhone(e.target.value)} className="mt-1.5 w-full rounded-xl border border-border bg-surface/50 px-4 py-2.5 text-sm text-ink outline-none focus:border-primary" />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-[0.2em] text-ink-soft">Outstanding Balance (Rs.)</label>
+                <input type="number" value={editBalance} onChange={e => setEditBalance(e.target.value)} className="mt-1.5 w-full rounded-xl border border-border bg-surface/50 px-4 py-2.5 text-sm text-ink outline-none focus:border-primary" />
+                <p className="mt-1 text-xs text-ink-soft">⚠️ Editing balance directly won't add a transaction record. Use "Record Payment" for payments.</p>
+              </div>
+            </div>
+            <div className="flex gap-3 border-t border-border px-6 py-4">
+              <button onClick={() => setEditCustomer(null)} className="flex-1 h-10 rounded-xl border border-border text-sm font-medium text-ink-soft hover:bg-surface/50 transition-colors">Cancel</button>
+              <button onClick={handleEditSave} disabled={savingEdit} className="flex-1 h-10 rounded-xl bg-primary text-sm font-semibold text-primary-foreground hover:bg-primary-deep transition-colors disabled:opacity-50">
+                {savingEdit ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Info / Full History Modal ── */}
+      {infoCustomer && (
+        <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm p-4 pt-16 sm:pt-24 overflow-y-auto">
+          <div className="w-full max-w-lg rounded-3xl border border-border bg-background shadow-2xl overflow-hidden flex flex-col mb-16">
+            {/* Header */}
+            <div className="flex items-start justify-between border-b border-border px-6 py-5 shrink-0">
+              <div>
+                <div className="text-[11px] font-semibold uppercase tracking-[0.25em] text-primary">Khata Statement</div>
+                <h3 className="mt-1 font-display text-2xl text-ink">{infoCustomer.name}</h3>
+                <div className="flex items-center gap-1.5 mt-1 text-sm text-ink-soft">
+                  <Phone className="size-3" />{infoCustomer.phone}
+                </div>
+              </div>
+              <button onClick={() => setInfoCustomer(null)} className="flex size-9 items-center justify-center rounded-full border border-border text-ink-soft hover:bg-surface/50 transition-colors shrink-0">
+                <X className="size-4" />
+              </button>
+            </div>
+
+            {/* Balance Summary */}
+            <div className="grid grid-cols-2 gap-3 px-6 py-4 bg-surface/30 border-b border-border shrink-0">
+              <div className="rounded-2xl bg-background border border-border p-3 text-center">
+                <div className="text-xs text-ink-soft font-semibold uppercase tracking-[0.2em]">Total Credit</div>
+                <div className="mt-1 font-display text-xl text-red-600">
+                  Rs. {infoTransactions.filter(t => t.type === 'credit').reduce((s, t) => s + t.amount, 0).toLocaleString()}
+                </div>
+              </div>
+              <div className="rounded-2xl bg-background border border-border p-3 text-center">
+                <div className="text-xs text-ink-soft font-semibold uppercase tracking-[0.2em]">Total Paid</div>
+                <div className="mt-1 font-display text-xl text-green-600">
+                  Rs. {infoTransactions.filter(t => t.type === 'payment').reduce((s, t) => s + t.amount, 0).toLocaleString()}
+                </div>
+              </div>
+              <div className="col-span-2 rounded-2xl border-2 border-primary/20 bg-primary/5 p-3 text-center">
+                <div className="text-xs text-primary font-semibold uppercase tracking-[0.2em]">Outstanding Balance</div>
+                <div className="mt-1 font-display text-2xl text-primary">Rs. {infoCustomer.balance.toLocaleString()}</div>
+              </div>
+            </div>
+
+            {/* Transaction List */}
+            <div className="flex-1 overflow-y-auto px-6 py-4">
+              <div className="text-xs font-semibold uppercase tracking-[0.25em] text-ink-soft mb-3">Full Transaction Log</div>
+              {infoTransactions.length === 0 ? (
+                <div className="py-8 text-center text-sm text-ink-soft">No transactions yet.</div>
+              ) : (
+                <div className="space-y-2">
+                  {infoTransactions.map((tx, i) => (
+                    <div key={tx.id} className="flex items-center gap-3 rounded-2xl border border-border bg-surface/30 px-4 py-3">
+                      <div className={`flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${tx.type === 'credit' ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-700'}`}>
+                        {tx.type === 'credit' ? 'K' : 'P'}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium text-ink truncate">{tx.description}</div>
+                        <div className="text-xs text-ink-soft mt-0.5">{new Date(tx.date).toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                      </div>
+                      <div className={`text-sm font-bold whitespace-nowrap ${tx.type === 'credit' ? 'text-red-600' : 'text-green-600'}`}>
+                        {tx.type === 'credit' ? '+' : '−'} Rs. {tx.amount.toLocaleString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="border-t border-border px-6 py-4 shrink-0">
+              <button onClick={() => setInfoCustomer(null)} className="w-full h-10 rounded-xl border border-border text-sm font-medium text-ink-soft hover:bg-surface/50 transition-colors">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </DashboardShell>
   );
 }

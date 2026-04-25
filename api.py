@@ -220,6 +220,47 @@ async def record_payment(data: dict):
     finally:
         conn.close()
 
+@app.put("/api/customers/{customer_id}")
+async def update_customer(customer_id: str, data: dict):
+    conn = get_db()
+    try:
+        existing = conn.execute("SELECT id FROM customers WHERE id = ?", (customer_id,)).fetchone()
+        if not existing:
+            raise HTTPException(status_code=404, detail="Customer not found")
+        
+        name = data.get("name")
+        phone = data.get("phone")
+        balance = data.get("balance")
+        
+        updates = []
+        values = []
+        if name is not None:
+            updates.append("name = ?")
+            values.append(name)
+        if phone is not None:
+            updates.append("phone = ?")
+            values.append(phone)
+        if balance is not None:
+            updates.append("balance = ?")
+            values.append(float(balance))
+        
+        if not updates:
+            raise HTTPException(status_code=400, detail="No fields to update")
+        
+        values.append(customer_id)
+        conn.execute(f"UPDATE customers SET {', '.join(updates)} WHERE id = ?", values)
+        conn.commit()
+        
+        updated = conn.execute("SELECT * FROM customers WHERE id = ?", (customer_id,)).fetchone()
+        return dict(updated)
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
 @app.get("/api/analytics")
 def get_analytics():
     conn = get_db()
