@@ -173,6 +173,53 @@ def get_transactions(customer_id: str):
     conn.close()
     return [dict(t) for t in txs]
 
+@app.post("/api/payment")
+async def record_payment(data: dict):
+    """Record a payment from a customer, reducing their balance."""
+    conn = get_db()
+    cursor = conn.cursor()
+    try:
+        customer_id = data.get("customer_id")
+        amount = float(data.get("amount", 0))
+        note = data.get("note", "Payment received")
+        
+        if amount <= 0:
+            raise HTTPException(status_code=400, detail="Payment amount must be greater than 0")
+        
+        # Get current balance
+        customer = cursor.execute("SELECT id, name, balance FROM customers WHERE id = ?", (customer_id,)).fetchone()
+        if not customer:
+            raise HTTPException(status_code=404, detail="Customer not found")
+        
+        current_balance = customer["balance"]
+        new_balance = max(0, current_balance - amount)  # Never go below 0
+        actual_paid = current_balance - new_balance      # Actual deducted (cap at balance)
+        
+        # Update balance
+        cursor.execute("UPDATE customers SET balance = ? WHERE id = ?", (new_balance, customer_id))
+        
+        # Log the payment transaction
+        cursor.execute(
+            "INSERT INTO transactions (id, customer_id, type, amount, description, date) VALUES (?, ?, ?, ?, ?, ?)",
+            (str(uuid.uuid4()), customer_id, "payment", actual_paid, note, datetime.now().isoformat())
+        )
+        
+        conn.commit()
+        return {
+            "status": "success",
+            "customer_id": customer_id,
+            "paid": actual_paid,
+            "previous_balance": current_balance,
+            "new_balance": new_balance
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        conn.close()
+
 @app.get("/api/analytics")
 def get_analytics():
     conn = get_db()

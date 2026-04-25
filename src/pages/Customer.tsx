@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { ArrowRight, ChevronDown, ChevronUp, Clock, Phone, Search, TrendingUp, Users, Trash2, AlertTriangle } from "lucide-react";
+import { ArrowRight, ChevronDown, ChevronUp, Clock, Phone, Search, TrendingUp, Users, Trash2, AlertTriangle, Banknote, X } from "lucide-react";
 import { Link } from "react-router-dom";
 import { DashboardShell } from "@/components/DashboardShell";
 import { toast } from "sonner";
@@ -41,6 +41,11 @@ export default function Customer() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const [showDeleteAll, setShowDeleteAll] = useState(false);
   const [deletingAll, setDeletingAll] = useState(false);
+  // Payment form state
+  const [paymentCustomerId, setPaymentCustomerId] = useState<string | null>(null);
+  const [paymentAmount, setPaymentAmount] = useState("");
+  const [paymentNote, setPaymentNote] = useState("");
+  const [submittingPayment, setSubmittingPayment] = useState(false);
 
   useEffect(() => {
     fetchCustomers();
@@ -120,9 +125,45 @@ export default function Customer() {
     }
   };
 
+  const handleRecordPayment = async (customerId: string) => {
+    const amount = parseFloat(paymentAmount);
+    if (!amount || amount <= 0) return toast.error("Enter a valid amount");
+    setSubmittingPayment(true);
+    try {
+      const res = await fetch("http://localhost:8000/api/payment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customer_id: customerId,
+          amount,
+          note: paymentNote.trim() || "Payment received"
+        })
+      });
+      if (!res.ok) throw new Error("Failed to record payment");
+      const result = await res.json();
+      // Update customer balance in state
+      setCustomers(prev => prev.map(c =>
+        c.id === customerId ? { ...c, balance: result.new_balance } : c
+      ));
+      // Refresh transactions for this customer
+      setCustomerTransactions(prev => { const copy = { ...prev }; delete copy[customerId]; return copy; });
+      await fetchCustomerTransactions(customerId);
+      fetchStats();
+      toast.success(`Payment of Rs. ${result.paid.toLocaleString()} recorded. New balance: Rs. ${result.new_balance.toLocaleString()}`);
+      setPaymentCustomerId(null);
+      setPaymentAmount("");
+      setPaymentNote("");
+    } catch {
+      toast.error("Failed to record payment");
+    } finally {
+      setSubmittingPayment(false);
+    }
+  };
+
   const toggleExpand = async (customerId: string) => {
     if (expandedCustomerId === customerId) {
       setExpandedCustomerId(null);
+      setPaymentCustomerId(null);
     } else {
       setExpandedCustomerId(customerId);
       await fetchCustomerTransactions(customerId);
@@ -279,27 +320,104 @@ export default function Customer() {
                     </div>
                   </div>
 
-                  {/* Expanded Transactions */}
+                  {/* Expanded Panel */}
                   {expandedCustomerId === customer.id && (
-                    <div className="bg-surface/20 px-5 py-4 border-t border-border">
-                      <div className="text-xs font-semibold uppercase tracking-[0.25em] text-primary mb-3">Transaction History</div>
-                      {customerTransactions[customer.id]?.length === 0 ? (
-                        <div className="text-sm text-ink-soft py-4">No transactions yet</div>
-                      ) : (
-                        <div className="space-y-2">
-                          {customerTransactions[customer.id]?.map((tx) => (
-                            <div key={tx.id} className="flex items-center justify-between py-2 px-3 rounded-lg bg-background border border-border">
-                              <div className="flex-1">
-                                <div className="text-sm font-medium text-ink">{tx.description}</div>
-                                <div className="text-xs text-ink-soft mt-0.5">{formatDate(tx.date)}</div>
-                              </div>
-                              <div className={`text-sm font-semibold ${tx.type === 'credit' ? 'text-red-600' : 'text-green-600'}`}>
-                                {tx.type === 'credit' ? '+' : '-'} Rs. {tx.amount.toLocaleString()}
-                              </div>
-                            </div>
-                          ))}
+                    <div className="bg-surface/20 px-5 py-4 border-t border-border space-y-4">
+
+                      {/* Record Payment */}
+                      <div className="rounded-2xl border border-green-200 bg-green-50 p-4">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2 text-green-700">
+                            <Banknote className="size-4" />
+                            <span className="text-xs font-semibold uppercase tracking-[0.2em]">Record Payment</span>
+                          </div>
+                          {paymentCustomerId === customer.id && (
+                            <button onClick={() => { setPaymentCustomerId(null); setPaymentAmount(""); setPaymentNote(""); }} className="text-ink-soft hover:text-ink">
+                              <X className="size-4" />
+                            </button>
+                          )}
                         </div>
-                      )}
+
+                        {paymentCustomerId === customer.id ? (
+                          <div className="space-y-2">
+                            <div className="flex gap-2">
+                              <div className="relative flex-1">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-ink-soft">Rs.</span>
+                                <input
+                                  type="number"
+                                  min="1"
+                                  placeholder="Amount paid"
+                                  value={paymentAmount}
+                                  onChange={(e) => setPaymentAmount(e.target.value)}
+                                  className="w-full rounded-xl border border-green-300 bg-white pl-10 pr-3 py-2 text-sm outline-none focus:border-green-500"
+                                  autoFocus
+                                />
+                              </div>
+                              <input
+                                type="text"
+                                placeholder="Note (optional)"
+                                value={paymentNote}
+                                onChange={(e) => setPaymentNote(e.target.value)}
+                                className="flex-1 rounded-xl border border-green-300 bg-white px-3 py-2 text-sm outline-none focus:border-green-500"
+                              />
+                            </div>
+                            <div className="flex gap-2">
+                              <button
+                                onClick={() => handleRecordPayment(customer.id)}
+                                disabled={submittingPayment || !paymentAmount}
+                                className="flex-1 h-9 rounded-xl bg-green-600 text-white text-sm font-semibold hover:bg-green-700 transition-colors disabled:opacity-50"
+                              >
+                                {submittingPayment ? "Saving..." : "✓ Confirm Payment"}
+                              </button>
+                              <button
+                                onClick={() => { setPaymentCustomerId(null); setPaymentAmount(""); setPaymentNote(""); }}
+                                className="h-9 px-4 rounded-xl border border-green-300 text-sm text-green-700 hover:bg-green-100 transition-colors"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                            <p className="text-xs text-green-700/70">
+                              Current khata: <strong>Rs. {customer.balance.toLocaleString()}</strong>
+                              {paymentAmount && parseFloat(paymentAmount) > 0 && (
+                                <> → After payment: <strong>Rs. {Math.max(0, customer.balance - parseFloat(paymentAmount)).toLocaleString()}</strong></>
+                              )}
+                            </p>
+                          </div>
+                        ) : (
+                          <button
+                            onClick={() => { setPaymentCustomerId(customer.id); setPaymentAmount(""); setPaymentNote(""); }}
+                            disabled={customer.balance === 0}
+                            className="w-full h-9 rounded-xl border border-green-300 text-sm font-semibold text-green-700 hover:bg-green-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            {customer.balance === 0 ? "✓ Fully Paid" : "+ Record Payment Received"}
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Transaction History */}
+                      <div>
+                        <div className="text-xs font-semibold uppercase tracking-[0.25em] text-primary mb-3">Transaction History</div>
+                        {customerTransactions[customer.id]?.length === 0 ? (
+                          <div className="text-sm text-ink-soft py-2">No transactions yet</div>
+                        ) : (
+                          <div className="space-y-2">
+                            {customerTransactions[customer.id]?.map((tx) => (
+                              <div key={tx.id} className="flex items-center justify-between py-2 px-3 rounded-lg bg-background border border-border">
+                                <div className="flex items-center gap-2 flex-1">
+                                  <span className={`size-2 rounded-full shrink-0 ${tx.type === 'credit' ? 'bg-red-400' : 'bg-green-500'}`} />
+                                  <div>
+                                    <div className="text-sm font-medium text-ink">{tx.description}</div>
+                                    <div className="text-xs text-ink-soft mt-0.5">{formatDate(tx.date)}</div>
+                                  </div>
+                                </div>
+                                <div className={`text-sm font-semibold whitespace-nowrap ${tx.type === 'credit' ? 'text-red-600' : 'text-green-600'}`}>
+                                  {tx.type === 'credit' ? '+ Khata' : '− Paid'} Rs. {tx.amount.toLocaleString()}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
