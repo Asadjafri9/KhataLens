@@ -40,7 +40,6 @@ const Header = () => {
         <a href="#testimonials" className="hover:text-primary transition-colors">Impact</a>
       </nav>
       <div className="flex items-center gap-3">
-        <a href="/login" className="hidden sm:inline text-sm font-medium text-ink-soft hover:text-ink">Login</a>
         <motion.a 
           whileHover={{ scale: 1.05, y: -1 }}
           whileTap={{ scale: 0.95 }}
