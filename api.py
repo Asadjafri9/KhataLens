@@ -173,6 +173,64 @@ def get_transactions(customer_id: str):
     conn.close()
     return [dict(t) for t in txs]
 
+@app.get("/api/analytics")
+def get_analytics():
+    conn = get_db()
+    try:
+        # Total open balance (sum of what customers still owe)
+        open_balance = conn.execute("SELECT COALESCE(SUM(balance), 0) FROM customers").fetchone()[0]
+        
+        # Total ever imported (sum of all credit transactions = total amount given on credit)
+        total_credit = conn.execute("SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE type = 'credit'").fetchone()[0]
+        
+        # Total recovered = total credit - open balance
+        total_recovered = total_credit - open_balance
+        
+        # Customer count
+        customer_count = conn.execute("SELECT COUNT(*) FROM customers").fetchone()[0]
+        
+        # Customers with balance > 0 (overdue/pending)
+        pending_count = conn.execute("SELECT COUNT(*) FROM customers WHERE balance > 0").fetchone()[0]
+        
+        # Customers with balance = 0 (fully paid)
+        paid_count = customer_count - pending_count
+        
+        # Monthly data: group transactions by month
+        monthly_rows = conn.execute("""
+            SELECT 
+                strftime('%Y-%m', date) as month_key,
+                strftime('%b', date) as month_label,
+                SUM(amount) as total
+            FROM transactions
+            WHERE type = 'credit'
+            GROUP BY month_key
+            ORDER BY month_key ASC
+            LIMIT 6
+        """).fetchall()
+        
+        monthly_data = []
+        for row in monthly_rows:
+            monthly_data.append({
+                "month": row["month_label"],
+                "imported": round(row["total"], 2)
+            })
+
+        return {
+            "openBalance": round(open_balance, 2),
+            "totalCredit": round(total_credit, 2),
+            "totalRecovered": round(max(total_recovered, 0), 2),
+            "customerCount": customer_count,
+            "pendingCount": pending_count,
+            "paidCount": paid_count,
+            "monthlyData": monthly_data,
+            "statusBreakdown": [
+                {"label": "Paid Off", "value": paid_count},
+                {"label": "Pending", "value": pending_count},
+            ]
+        }
+    finally:
+        conn.close()
+
 @app.delete("/api/customers/all")
 def delete_all_customers():
     conn = get_db()
