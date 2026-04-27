@@ -1,0 +1,286 @@
+Create a complete, production-quality, responsive SaaS landing page UI.
+
+I want you to follow this exact creative direction:
+
+CORE DIRECTION
+Use Prompt 01 as the PRIMARY foundation for the entire UI. The overall design, layout feeling, background treatment, box/grid structure, bold visual hierarchy, and brutalist-lite SaaS vibe should come mainly from Prompt 01.
+
+Then selectively integrate only these parts from the other prompts:
+- From Prompt 02: add the scroll-triggered hand-drawn underline effect and in-view text animation.
+- From Prompt 03: use the typography style and text treatment only.
+Do NOT let Prompt 03 change the full layout language. The page must still feel mostly like Prompt 01.
+
+MAIN GOAL
+The final UI should feel like:
+- 80% Prompt 01
+- 10% Prompt 02
+- 10% Prompt 03
+
+So the result should still look and feel like Prompt 01 in structure and atmosphere, but enhanced with:
+- scroll-based underline animation
+- elegant text reveal animation
+- typography/text styling inspired by Prompt 03
+
+COLOR DIRECTION — VERY IMPORTANT
+Use this color combination as the foundation of the entire UI:
+- Light warm gray: #fcf6f5
+- Rich dark red: #990011
+
+You MUST keep these two colors as the primary identity of the design, but you should intelligently expand and adjust the palette around them so the UI looks premium, balanced, and visually polished.
+
+That means:
+- use #fcf6f5 as the main light background anchor
+- use #990011 as the main accent / brand / CTA anchor
+- derive supporting shades, tints, darker variations, muted tones, border tones, hover states, and soft contrast colors from these two anchors
+- adjust the intensity where needed for readability, hierarchy, hover states, cards, overlays, and section contrast
+- do not use the two colors in a flat or overly simplistic way
+- create a refined, design-forward system using these two base colors
+
+The result should feel elegant, bold, sharp, and conversion-focused — not dull, not overly decorative, and not generic.
+
+IMPORTANT DESIGN RULES
+1. Keep the overall layout, section flow, contrast system, hero composition, boxed grid feel, and background treatment from Prompt 01.
+2. Keep the box-shaped / grid-patterned background aesthetic from Prompt 01.
+3. Keep the high-contrast editorial SaaS look from Prompt 01.
+4. Use typography from Prompt 03 instead of Prompt 01’s original headline font system.
+5. Adapt the original Prompt 01 color logic into the new palette based on #fcf6f5 and #990011.
+6. Do not make the design soft, rounded, overly trendy, glassmorphic, or startup-generic.
+7. Do not turn it into a luxury portfolio website. It must remain a SaaS landing page first.
+8. Use Prompt 03 only for typography, text styling, and subtle editorial treatment — not for replacing the full visual system.
+
+VISUAL STYLE
+Design a bold, modern B2C SaaS landing page with a high-contrast editorial brutalist-lite aesthetic.
+The UI should feel sharp, premium, clean, aggressive, and conversion-focused.
+
+Use:
+- strong section separation
+- structured boxes and panels
+- visible borders
+- large headline blocks
+- confident whitespace
+- geometric alignment
+- bold CTA treatment
+- a grid-based background pattern
+
+COLOR SYSTEM APPLICATION
+Translate Prompt 01’s contrast strategy into this new palette.
+
+Suggested usage logic:
+- Main background: #fcf6f5
+- Primary dark accent / CTA / key emphasis: #990011
+- Derived deeper burgundy / near-black red tones for dark sections
+- Soft blush / dusty rose / warm off-white derived tones for subtle surfaces
+- Muted warm gray-red border tones for cards and separators
+- Text colors should be optimized for readability, using dark red-based deep tones or near-black neutrals if needed
+- Buttons, highlights, hover states, and emphasis areas should revolve around the rich dark red family
+
+Claude should make the palette feel cohesive and sophisticated, not forced.
+Preserve contrast, readability, and visual hierarchy above all.
+
+TYPOGRAPHY
+Use Prompt 03 typography direction for text styling:
+- Headlines: Clash Display or a similar heavy geometric sans serif
+- Body: Satoshi
+- Headline tracking: slightly tight, around -0.04em to -0.05em
+- Headline line-height: around 0.9
+- Body weight: medium / 500
+- Large editorial typography should dominate the page
+
+TEXT STYLING FROM PROMPT 03
+Apply these selectively:
+- typographic authority
+- oversized clean headline styling
+- layered or echo-style text effect only where appropriate
+- editorial emphasis
+- sharp contrast between large bold display text and restrained body copy
+
+Do NOT overuse the echo effect.
+Use it only in the hero headline or one major statement.
+
+BACKGROUND / BOX FEEL
+This is extremely important:
+I want the background and box-shaped UI feeling to match Prompt 01.
+Use:
+- a visible linear grid background
+- around 40px x 40px grid feel
+- subtle thin grid lines
+- boxed content areas
+- sharp rectangular section blocks
+- structured cards
+- strong panel composition
+
+The design should feel architectural and modular.
+
+The background grid and panels must be recolored to fit the new palette based on #fcf6f5 and #990011.
+
+PAGE STRUCTURE
+Build the landing page with this conversion-focused flow:
+
+1. Sticky Header / Navigation
+- Fixed or sticky header
+- Slight translucent background with backdrop blur
+- Left: wordmark / logo
+- Center: nav links
+- Right: login link + strong pill CTA button
+- Clean, minimal, premium SaaS nav
+
+2. Hero Section
+This should strongly follow Prompt 01.
+- Centered composition
+- Grid-patterned background
+- Small top badge
+- Huge headline with strong editorial hierarchy
+- One highlighted keyword or final word
+- Subheadline below
+- CTA row with input + primary button or primary + secondary CTA
+- Include a browser-style product mockup / software frame below or beside the hero content
+
+Hero text treatment:
+- Use Prompt 03-inspired typography
+- Add a subtle echo/layered text effect behind one main word or line
+- Keep the overall hero composition and energy from Prompt 01
+
+3. Social Proof / Trust Strip
+- Logos or metrics in a clean row
+- Keep minimal but clearly structured
+
+4. Problem vs Solution Split Section
+Strongly follow Prompt 01.
+- Split into two contrasting panels
+- Left side = “old way” / pain points
+- Right side = “new way” / product solution
+- Strong contrast, visible borders, sharp spacing
+- Use big display headings
+- This section should feel bold and persuasive
+
+5. Bento Feature Grid
+Follow Prompt 01 layout philosophy.
+- 3-column feature grid
+- Mixed spans for visual rhythm
+- Large boxed cards
+- Some cards wider/taller than others
+- Include abstract UI details inside cards
+- Maintain clean SaaS realism, not random decoration
+
+6. How It Works Section
+- Large section heading
+- Numbered process steps
+- Strong editorial layout
+- Numbers can be oversized and partially transparent
+- Add subtle hover/in-view movement
+
+7. Final CTA Section
+Follow Prompt 01 energy.
+- High-impact block
+- Use the dark red family as the emotional driver instead of yellow
+- Big headline
+- Clear CTA
+- Strong conversion focus
+- Large centered form or buttons
+
+ANIMATIONS
+Integrate these carefully:
+
+From Prompt 02:
+1. Scroll-triggered hand-drawn underline animation
+- Apply to selected keywords only
+- The underline should animate when the text enters the viewport
+- It should feel hand-drawn, not generic
+- Use SVG path animation or a custom stroke reveal
+- Make it elegant and noticeable, but not childish
+
+2. In-view text animation
+- Text should animate on scroll into view
+- Use subtle upward motion + fade + slight stagger
+- Headlines can reveal with a refined mask/clip motion
+- Keep it premium and smooth, not flashy
+
+Additional motion rules:
+- Motion must support the design, not overpower it
+- Keep transitions polished and editorial
+- Card hover can include slight lift, shadow enhancement, tone transitions, or subtle transform
+- Use modern easing
+- Everything should feel premium and intentional
+
+SPECIAL TYPOGRAPHIC EFFECT
+Use Prompt 03’s text style selectively:
+- One major hero line can have a layered echo stack behind it
+- The top layer should remain the most readable
+- The background layers should be subtle and tonal, not distracting
+- If the layered echo effect hurts clarity, reduce it
+
+COMPONENT DETAILS
+Include:
+- strong rectangular cards
+- thin borders
+- subtle shadows
+- grid pattern usage
+- editorial spacing
+- pill buttons where needed
+- bold CTA buttons
+- refined form controls
+- browser-style product mockup
+- clean icon handling
+- responsive layout logic
+
+DESIGN INTELLIGENCE
+You are not limited to using only two flat colors.
+You should build a complete UI color system around:
+- #fcf6f5
+- #990011
+
+That means you should intelligently create:
+- hover colors
+- border colors
+- section contrast tones
+- subtle background variations
+- muted support tones
+- text hierarchy colors
+- shadows and overlays
+- dark mode-like section contrast if needed within the same palette family
+
+The design must look visually excellent and professionally art-directed while staying faithful to these two base colors.
+
+DO NOT USE
+- glassmorphism
+- neon cyberpunk
+- soft blob gradients
+- overly playful illustrations
+- random 3D elements
+- too many rounded corners
+- generic startup UI clichés
+- overdecorated luxury portfolio styling
+- too much monochrome from Prompt 03
+
+RESPONSIVENESS
+The layout must be fully responsive across:
+- desktop
+- tablet
+- mobile
+
+On mobile:
+- preserve the same strong visual identity
+- maintain box/grid feeling
+- keep headline impact
+- stack intelligently without losing hierarchy
+
+OUTPUT REQUIREMENTS
+Generate the full UI implementation, not just a concept description.
+
+If coding:
+- create a complete frontend landing page
+- use clean, production-quality structure
+- maintain reusable sections/components
+- ensure responsive behavior
+- include all key styling and animation logic
+- keep the UI visually polished and close to the direction above
+
+FINAL CREATIVE PRIORITY
+If there is any conflict between directions:
+- layout, background, box structure, and overall mood must follow Prompt 01
+- scroll underline animation and text animation must come from Prompt 02
+- typography and text styling must come from Prompt 03 only
+- color palette must be built around #fcf6f5 and #990011, intelligently expanded for the best visual result
+
+The final result must feel like:
+Prompt 01 UI with Prompt 02 motion details, Prompt 03 typography styling, and a refined color system built from #fcf6f5 and #990011.

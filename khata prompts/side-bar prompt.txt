@@ -1,0 +1,76 @@
+The sidebar in this project is a beautiful and common pattern called an "accordion sidebar" or "hover-to-expand sidebar."
+
+It uses Tailwind CSS to handle the hover animations seamlessly. Here is how you can recreate the exact same effect in a different project.
+
+How it works:
+The Wrapper: The <aside> acts as the parent container. By default, it's set to a narrow width (w-[68px]).
+The Hover Effect: It has a Tailwind class hover:w-[200px] and overflow-hidden. When the user hovers over it, the width beautifully animates to 200px.
+The Group Class: By adding the class group to the <aside>, the icons inside can react to you hovering over the parent sidebar, not just the buttons themselves.
+The Transition: It uses a CSS transition class (like transition-all duration-300 ease-in-out in Tailwind) to interpolate the width smoothly.
+The Code Snippet (HTML + Tailwind)
+Here is a prompt or snippet you can drop directly into your next project:
+<!-- You must include Tailwind CSS in your project for this to work -->
+
+<!-- SIDEBAR CONTAINER -->
+<aside class="group h-screen bg-gray-900 border-r border-gray-800 transition-all duration-300 ease-out w-[68px] hover:w-[240px] overflow-hidden flex flex-col py-4">
+  
+  <!-- Navigation Top Items -->
+  <div class="flex-1 space-y-2 px-2">
+    
+    <!-- Navigation Button -->
+    <!-- The button has whitespace-nowrap so the text doesn't wrap when the sidebar is thin -->
+    <button class="flex items-center w-full px-3 py-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors whitespace-nowrap">
+      
+      <!-- Icon (Always fixed width to align nicely) -->
+      <svg class="w-5 h-5 min-w-[20px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+      </svg>
+      
+      <!-- Text label (Hidden opacity by default, becomes visible on group-hover) -->
+      <span class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100 font-medium">
+        Dashboard
+      </span>
+      
+    </button>
+
+    <button class="flex items-center w-full px-3 py-3 text-gray-400 hover:text-white hover:bg-gray-800 rounded-lg transition-colors whitespace-nowrap">
+      <svg class="w-5 h-5 min-w-[20px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+      <span class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100 font-medium">
+        Upload Resume
+      </span>
+    </button>
+
+  </div>
+
+  <!-- Bottom Log Out Item -->
+  <div class="px-2">
+    <button class="flex items-center w-full px-3 py-3 text-red-400 hover:text-red-300 hover:bg-red-950/30 rounded-lg transition-colors whitespace-nowrap">
+      <svg class="w-5 h-5 min-w-[20px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+      </svg>
+      <span class="ml-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 delay-100 font-medium">
+        Log Out
+      </span>
+    </button>
+  </div>
+  
+</aside>
+Key Custom CSS (if you aren't using Tailwind)
+If you build this in standard CSS without a framework, you simply need a snippet like this:
+.sidebar {
+  width: 68px;
+  overflow: hidden;
+  white-space: nowrap;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.sidebar:hover {
+  width: 240px; /* Expands to full width */
+}
+
+/* Ensure icons don't shrink during the animation */
+.icon {
+  min-width: 20px;
+}

@@ -1,0 +1,662 @@
+Create a pixel-faithful, production-quality React + TypeScript + Tailwind project called KhataLens.
+
+IMPORTANT:
+This is not a generic SaaS template. This must feel like a premium, bold, editorial, investor-ready hackathon product with the same artistic direction and interaction feel as the Flux-style reference UI: sharp typography, strong contrast, burgundy accents, warm off-white background, minimal radius, premium motion, and slightly experimental visual energy.
+
+The product is:
+KhataLens — an AI-powered paper-to-ledger assistant for small shopkeepers in Pakistan. It converts handwritten udhaar notebook pages into structured digital customer ledgers, highlights overdue balances, and generates ready-to-send WhatsApp payment reminders.
+
+The final output should include:
+1. A premium marketing landing page
+2. A clickable product-style app prototype section / pages
+3. Strong visual continuity between marketing and product UI
+4. Clean reusable components and production-quality frontend structure
+
+Tech requirements
+- React
+- TypeScript
+- Tailwind CSS
+- Component-driven architecture
+- Responsive across desktop, tablet, mobile
+- Use Tailwind utilities plus small custom CSS for reveal effects, scribble underline, subtle grid backgrounds, and 3D card/flip motion
+- Avoid generic gradients and bloated glassmorphism
+- Keep it polished, sharp, premium, and demo-friendly
+
+==================================================
+BRAND IDENTITY
+==================================================
+
+Brand name:
+KhataLens
+
+Core positioning:
+Pakistan’s small businesses already have data — it’s just trapped inside paper.
+KhataLens unlocks that trapped business data using AI.
+
+Brand personality:
+- smart
+- trustworthy
+- practical
+- fast
+- local
+- premium
+- slightly bold/editorial
+- clear business utility, not “AI gimmick”
+
+Visual direction:
+- Premium editorial SaaS meets practical fintech utility
+- Strong contrast
+- Clean structure
+- Warm, slightly analog feeling to hint at paper ledgers
+- AI should feel useful and tangible, not abstract sci-fi
+
+Color palette
+Use CSS variables for all theme tokens.
+
+Primary tokens:
+- Background: #fcf6f5
+- Main text / ink: #1a1013
+- Muted text: #5b4a4d
+- Primary accent burgundy: #990011
+- Primary deep burgundy: #700009
+- Card background light: #fffafa
+- Border light: rgba(26,16,19,0.08)
+- Dark section background: #2a0a0f
+- Dark elevated panel: #3b0b12
+- Soft blush tint: #f6e8e7
+- Success accent: #0f8a5f
+- Warning accent: #d97706
+
+Radius
+- tight and minimal, around 4px to 8px
+- buttons can be more pill-like where needed
+- avoid rounded-2xl/3xl everywhere
+
+Typography
+- Display/heading font: Clash Display
+- Body font: Satoshi
+- Fallback: Inter, sans-serif
+- Headlines: uppercase, heavy, tight tracking, high rhythm
+- Body copy: clean, medium-weight, readable
+- Big sections should feel like a modern editorial campaign page
+
+Layout
+- Max width around 1200px to 1280px
+- Strong spacing rhythm
+- Large section padding
+- Grid-based alignment
+- Use subtle background grid textures in selected sections
+- Use visible contrast between sections
+
+Motion and interaction
+- Smooth reveal-on-scroll animations
+- fade-up with slight stagger
+- tasteful cubic-bezier easing
+- sticky header turns translucent/blurred with bottom border on scroll
+- hover lift on cards
+- subtle 3D flip on some cards
+- animated scribble underline on important words
+- buttons have slight scale and premium hover transition
+- motion must be performant and mobile-safe
+
+==================================================
+PROJECT STRUCTURE
+==================================================
+
+Build a multi-section experience with these parts:
+
+A. Landing page
+B. Embedded app preview
+C. Product-style demo pages or sections:
+   - Upload / Scan
+   - Extraction Results
+   - Customer Ledger
+   - Insights / Overdue
+   - Reminder Generator
+
+The design language must stay consistent across all of them.
+
+==================================================
+LANDING PAGE — SECTION ORDER
+==================================================
+
+1) FIXED HEADER
+- Transparent at top
+- Becomes blurred/translucent with bottom border when page scrolls
+- Left: logo text “KhataLens” with a burgundy dot or lens-style accent
+- Center nav links:
+  Features
+  How it works
+  Demo
+  Why it wins
+- Right:
+  Login
+  Primary rounded button: Try Demo →
+- On mobile, collapse elegantly into a menu drawer or clean icon-triggered sheet
+
+2) HERO SECTION
+Layout:
+- Centered premium hero
+- Small pill badge at top:
+  “Built for paper-to-digital bookkeeping”
+  with a tiny pulsing dot
+- Giant headline in uppercase:
+  TURN PAPER
+  INTO PAYBACK.
+- Add animated hand-drawn scribble underline under the word PAPER or PAYBACK
+- Make PAYBACK burgundy for contrast
+- Supporting paragraph:
+  KhataLens helps shopkeepers turn handwritten udhaar notebooks into searchable customer ledgers, overdue alerts, and ready-to-send WhatsApp reminders using AI.
+- CTA row:
+  Primary button: See Live Demo →
+  Secondary button: How it Works
+- Small supporting text:
+  Built for hackathons. Designed for real merchants.
+- Behind or around the hero headline, include a decorative product visual:
+  a premium abstract “paper to structured data” visual motif
+  with floating ledger strips, structured rows, subtle burgundy glow, and card fragments assembling into a dashboard
+- Below the main hero text, include a large browser-style product mockup card
+
+Browser-style mockup details:
+- top bar with 3 circles
+- title text:
+  khatalens.app / scan / notebook-page
+- interior split into 3 columns:
+  left sidebar
+  center extracted ledger table
+  right AI insights/reminder panel
+- Make it feel like a premium fintech/productivity tool, not a generic admin dashboard
+
+Hero product mockup content:
+Left sidebar:
+- Dashboard
+- Scan Ledger
+- Customers
+- Overdue
+- Reminders
+- Exports
+
+Center panel:
+Show a styled extracted table with columns like:
+- Customer
+- Amount
+- Date
+- Type
+- Status
+- Confidence
+
+Sample rows:
+- Aslam Bhai | Rs. 2,500 | 18 Apr | Credit | Overdue | 94%
+- Imran Store | Rs. 1,000 | 21 Apr | Paid | Closed | 98%
+- Naeem | Rs. 900 | 19 Apr | Udhaar | Pending | 89%
+- Chai Hotel | Rs. 3,200 | 11 Apr | Balance | Overdue | 86%
+
+Right panel:
+- Total recoverable: Rs. 6,600
+- Overdue accounts: 3
+- Oldest balance: 13 days
+- Recommended follow-up: Aslam Bhai
+- Button: Generate Urdu Reminder
+
+3) SOCIAL PROOF STRIP
+- Centered text:
+  Built for the businesses still running on notebooks
+- Show a row of industry labels instead of fake startups:
+  KIRYANA STORES
+  GENERAL STORES
+  PHARMACIES
+  WHOLESALERS
+  SERVICE SHOPS
+  LOCAL RETAILERS
+- Keep it tasteful, like wordmarks
+
+4) PROBLEM VS SOLUTION SPLIT SECTION
+Two-column full-width split block
+
+Left dark column:
+- Label: The old way
+- Big text:
+  DATA STUCK
+  IN PAPER.
+- Short paragraph:
+  Handwritten udhaar pages are hard to search, easy to lose, and painful to follow up on.
+- Bullet list with X icons:
+  Scattered balances across pages
+  No searchable customer history
+  Hard to spot overdue accounts
+  Manual follow-ups waste time
+  Errors from messy writing and missing dates
+
+Right burgundy column:
+- Label: The KhataLens way
+- Big text:
+  SNAP. STRUCTURE.
+  RECOVER.
+- Short paragraph:
+  KhataLens transforms messy notebook pages into usable ledger intelligence in seconds.
+- Bullet list with check icons:
+  AI extracts handwritten transactions
+  Customer-wise balances are organized instantly
+  Overdue accounts get prioritized
+  WhatsApp reminders are drafted automatically
+  Merchants can review low-confidence rows before saving
+- Add subtle grid overlay to both columns
+
+5) FEATURES BENTO SECTION
+- Label: Features
+- Heading:
+  Built for merchants who need clarity fast.
+- Subtitle:
+  Not another bookkeeping app. An AI migration layer for paper-ledger businesses.
+
+Create a premium responsive bento grid of cards.
+Some cards can use flip interaction on hover.
+Use consistent lucide-style iconography.
+
+Feature cards:
+A. Handwriting to ledger
+   Front: “Vision AI reads messy khata pages”
+   Back: “Detects rows, names, dates, amounts, and transaction types from unstructured notebook photos.”
+
+B. Smart transaction understanding
+   Front: “Language AI adds meaning”
+   Back: “Understands whether an entry is paid, pending, overdue, or incomplete — not just raw text.”
+
+C. Overdue detection
+   Front: “Priority follow-up engine”
+   Back: “Flags repeat debtors, stale balances, and accounts that need immediate action.”
+
+D. WhatsApp reminders
+   Front: “Localized reminder generation”
+   Back: “Creates polite Urdu or English reminders ready to send.”
+
+E. Confidence review
+   Front: “Human-in-the-loop accuracy”
+   Back: “Low-confidence entries are highlighted so the merchant can quickly confirm or correct them.”
+
+F. Export-ready records
+   Front: “From notebook to usable system”
+   Back: “Transactions can be organized into structured tables for future digital bookkeeping.”
+
+Design notes:
+- Border-driven premium cards
+- Slight lift on hover
+- Strong typography
+- Minimal but elegant shadows
+- Tight spacing, not too airy
+- Maintain exact premium editorial tone
+
+6) HOW IT WORKS SECTION
+Layout:
+- Left side sticky heading block
+- Right side large vertical steps
+
+Left:
+- Label: Process
+- Heading:
+  HOW IT
+  WORKS.
+- Supporting text:
+  KhataLens turns a chaotic paper workflow into a simple recover-and-follow-up loop.
+
+Right:
+3 large numbered steps with huge faint background numbers that turn accent on hover
+
+Step 01:
+- Title: Scan the notebook
+- Text: Upload or capture a handwritten khata page from a phone or desktop.
+
+Step 02:
+- Title: Let AI structure the ledger
+- Text: KhataLens extracts customer names, balances, dates, and transaction meaning into a clean ledger view.
+
+Step 03:
+- Title: Recover faster
+- Text: See overdue accounts, prioritize follow-ups, and generate WhatsApp reminders in one click.
+
+Optional mini visual chips near each step:
+- OCR + layout
+- NLP normalization
+- Reminder generation
+
+7) DEMO / PRODUCT WALKTHROUGH SECTION
+This section is extremely important.
+It should feel like the strongest part of the hackathon presentation.
+
+Label:
+Live workflow
+
+Heading:
+FROM NOTEBOOK
+TO ACTION.
+
+Create a horizontal or stacked product walkthrough with 4 screens/cards.
+
+Screen 1: Upload Notebook Image
+- Large upload panel
+- Show a notebook page preview placeholder illustration
+- Side note:
+  “Supports uneven handwriting, abbreviations, mixed Urdu/English, and messy rows.”
+- Button: Process Page
+
+Screen 2: AI Extraction Results
+- Show extracted table
+- Highlight one or two low-confidence rows with amber tint
+- Add confidence tags
+- Add an editable inline row action
+- Small note:
+  “Review flagged rows before saving.”
+
+Screen 3: Insights Dashboard
+- KPI cards:
+  Total recoverable amount
+  Overdue customers
+  Oldest pending balance
+  Active credit customers
+- Below, show a small “priority follow-up” list
+
+Screen 4: Reminder Generator
+- Customer selected: Aslam Bhai
+- Amount due: Rs. 2,500
+- Tabs:
+  Urdu
+  English
+- Text area mockup with generated message
+
+Urdu example:
+Aslam bhai, aap ka Rs. 2,500 udhaar pending hai. Meherbani kar ke payment kar dein. Shukriya.
+
+English example:
+Hello Aslam, your pending balance is Rs. 2,500. Please clear it when possible. Thank you.
+
+Buttons:
+- Copy Message
+- Send via WhatsApp
+
+This section should feel clickable and polished.
+Use consistent product mockup styling.
+Make it look like a real MVP.
+
+8) WHY THIS WINS SECTION
+Label:
+Why judges care
+
+Heading:
+A REAL AI
+WORKFLOW.
+
+Create 3 premium cards or columns:
+
+Card 1:
+- Title: Real pain point
+- Text: Existing digital khata tools help after a merchant starts entering data digitally. KhataLens solves the migration barrier first.
+
+Card 2:
+- Title: AI is core, not cosmetic
+- Text: Without AI, there is no extraction, no ledger structuring, no overdue reasoning, and no reminder generation.
+
+Card 3:
+- Title: Demo-ready magic
+- Text: A shopkeeper takes a picture of a notebook and seconds later knows who owes money and what to send next.
+
+Add a highlighted quote block:
+“Pakistan’s small businesses already have data — it’s just trapped inside paper.”
+
+9) TESTIMONIAL-STYLE / USER PERSONA SECTION
+Instead of fake testimonials from companies, create “merchant persona” cards that still look like testimonial cards.
+
+Label:
+Built for real users
+
+Heading:
+WHO THIS IS
+FOR.
+
+3 cards:
+- Kiryana Store Owner
+- Pharmacy Counter Manager
+- Small Wholesaler
+
+Each card front:
+- short quote-style pain point
+- 5-star row or premium small badge styling
+
+Card back or detail:
+- their need
+- what KhataLens helps them do
+
+Example card content:
+Kiryana Store Owner:
+“Udhaar likha hota hai, lekin dhoondna mushkil hota hai.”
+Back:
+Needs quick visibility into who owes what and who to remind first.
+
+Pharmacy Counter Manager:
+“Pages bhar jati hain, lekin overdue balances miss ho jate hain.”
+Back:
+Needs structured tracking and faster recovery without manual checking.
+
+Small Wholesaler:
+“Purane daftar ka data digital mein lane ka time hi nahi hota.”
+Back:
+Needs AI-assisted migration from notebooks to clean records.
+
+10) FINAL CTA BLOCK
+Full-width burgundy section
+Dark grid overlay
+Huge faint background words like:
+SCAN. STRUCTURE. RECOVER.
+
+Label:
+Start now
+
+Heading:
+STOP FLIPPING
+THROUGH PAGES.
+
+Supporting line:
+Turn handwritten khata pages into searchable ledgers and recovery-ready reminders.
+
+Buttons:
+- Try Demo →
+- View Workflow
+
+Optional small line:
+Built as a hackathon-ready AI product with a real-world business use case.
+
+11) FOOTER
+Dark footer background
+Left brand block:
+- KhataLens
+- short line:
+  AI-powered paper-to-ledger intelligence for small businesses.
+
+Columns:
+Product
+- Features
+- Demo
+- Workflow
+- Roadmap
+
+Use Cases
+- Kiryana Stores
+- Pharmacies
+- Wholesalers
+- Service Shops
+
+Resources
+- Docs
+- Pitch Notes
+- FAQ
+- Contact
+
+Bottom bar:
+- © 2026 KhataLens
+- Privacy
+- Terms
+- Security
+
+==================================================
+APP UI / PRODUCT PAGES
+==================================================
+
+In addition to the landing page, create internal product-style views or routes, or at minimum highly polished sections/components that could be easily separated into pages.
+
+These screens must match the landing page brand system.
+
+A) Dashboard
+- Top summary cards:
+  Total recoverable
+  Overdue accounts
+  Active customers
+  Last scan date
+- Main area:
+  recent scans
+  priority follow-ups
+  latest reminders
+- Tone: modern fintech/productivity workspace
+
+B) Scan Ledger Page
+- upload area with drag and drop
+- phone camera style placeholder
+- thumbnail preview panel
+- process CTA
+- supporting note on handwriting tolerance
+
+C) Extraction Review Page
+- editable table
+- confidence badges
+- row status chips:
+  Paid
+  Pending
+  Overdue
+  Needs Review
+- bulk actions:
+  Save Records
+  Mark Reviewed
+  Regenerate Parsing
+
+D) Customer Ledger Page
+- searchable customer list
+- right-side detail panel
+- customer summary:
+  total owed
+  last transaction
+  overdue count
+  reminder history
+
+E) Overdue Page
+- prioritized overdue list
+- filters:
+  high amount
+  oldest first
+  repeat debtor
+- highlight actionable urgency
+- use red/burgundy and amber carefully
+
+F) Reminder Generator Page
+- customer selector
+- language toggle:
+  Urdu / English
+- tone selector:
+  polite / neutral / firm
+- generated message textarea
+- buttons:
+  Copy
+  WhatsApp
+  Save Template
+
+==================================================
+COPY REQUIREMENTS
+==================================================
+
+Use the following messaging consistently.
+
+Primary one-line value proposition:
+KhataLens uses AI to turn handwritten udhaar notebooks into a searchable customer ledger, overdue tracker, and WhatsApp reminder engine.
+
+Alternative phrasing to use in supporting areas:
+- Turn messy khata pages into digital clarity.
+- From notebook chaos to recovery-ready records.
+- Bring paper ledgers into a usable digital workflow.
+- AI for merchants who still run on registers and notebooks.
+
+Use hackathon-friendly but investor-quality copy.
+Avoid generic filler like:
+- revolutionize
+- seamless ecosystem
+- next-gen synergy
+- empower everything
+Keep copy concrete and believable.
+
+==================================================
+VISUAL DETAILS TO MATCH THE REFERENCE STYLE
+==================================================
+
+- Warm off-white background
+- Sharp dark typography
+- Burgundy as the main accent
+- Tight spacing and border precision
+- Large editorial uppercase section headings
+- Some sections with subtle background grids
+- Some cards with perspective flip on hover
+- Some reveal/stagger animations
+- One hero underline scribble animation
+- Premium button styling with arrow icon
+- Browser mockup product cards
+- Mix of dark and light sections for rhythm
+- Avoid cartoonish illustrations
+- Use abstract product visuals, ledger fragments, data cards, and structured UI hints
+- Everything should feel deliberate, expensive, and presentation-ready
+
+==================================================
+RESPONSIVE REQUIREMENTS
+==================================================
+
+- Desktop first, but fully responsive
+- Hero headline scales fluidly
+- Nav collapses elegantly
+- Grids become 1-column or 2-column cleanly on smaller screens
+- Forms/buttons remain aligned on mobile
+- Product mockups remain readable and not cramped
+- Sticky sections should degrade gracefully on tablet/mobile
+
+==================================================
+QUALITY BAR
+==================================================
+
+This must look like a polished hackathon finalist submission, not a default template.
+
+The UI should make a judge immediately understand:
+1. what the product does
+2. where the AI is used
+3. why the workflow matters
+4. why the product is practical in Pakistan
+5. how the demo would work in real life
+
+Favor clarity, strong hierarchy, excellent spacing, and premium execution over excessive decoration.
+
+Output a complete, runnable frontend with reusable components and polished visual consistency.
+
+Refine the design to be much closer to a premium editorial SaaS landing page with sharp typography, burgundy accents, warm off-white background, minimal radius, strong section rhythm, subtle grid textures, and high-contrast product storytelling.
+
+Important corrections:
+- Make the typography bolder, larger, and more editorial
+- Reduce generic dashboard feel
+- Increase visual similarity to a premium Flux-style marketing UI
+- Keep KhataLens branding and product content exactly the same
+- Make the hero, problem-solution split, feature bento, and product walkthrough feel more polished and presentation-ready
+- Improve spacing rhythm and card hierarchy
+- Ensure the product mockups feel premium and believable
+- Keep the design hackathon-demo friendly and investor-ready
+
+Now refine only the visual polish:
+- make spacing more intentional
+- improve typography hierarchy
+- make burgundy accent usage more premium
+- enhance motion slightly but keep it tasteful
+- make product cards and browser mockups look more realistic
+- reduce template feeling
+- keep all copy and structure unchanged
+
+
