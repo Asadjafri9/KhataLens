@@ -575,7 +575,7 @@ INSTRUCTIONS:
                 "model": "stealth/ox-alpha",
                 "messages": messages,
                 "temperature": 0.7,
-                "max_tokens": 800
+                "max_tokens": 2000
             }
         )
         

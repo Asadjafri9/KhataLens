@@ -154,7 +154,7 @@ def extract_khata(image_path: Path, llm: str) -> KhataPage:
                 }
             ],
             "temperature": 0,
-            "max_tokens": 500,
+            "max_tokens": 4000,
         },
         timeout=60,
     )
@@ -171,6 +171,12 @@ def extract_khata(image_path: Path, llm: str) -> KhataPage:
     if content.endswith("```"):
         content = content[:-3]
     content = content.strip()
+
+    # Extract JSON from response (handle reasoning text before JSON)
+    json_start = content.find("{")
+    json_end = content.rfind("}")
+    if json_start != -1 and json_end != -1:
+        content = content[json_start:json_end + 1]
 
     data = json.loads(content)
     return KhataPage(**data)
