@@ -572,7 +572,7 @@ INSTRUCTIONS:
                 "Content-Type": "application/json"
             },
             json={
-                "model": "google/gemini-2.5-flash-lite",
+                "model": "google/gemini-2.0-flash-exp:free",
                 "messages": messages,
                 "temperature": 0.7,
                 "max_tokens": 800

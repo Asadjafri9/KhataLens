@@ -143,7 +143,7 @@ def extract_khata(image_path: Path, llm: str) -> KhataPage:
             "Content-Type": "application/json",
         },
         json={
-            "model": "google/gemini-2.5-flash-lite",
+            "model": "google/gemini-2.0-flash-exp:free",
             "messages": [
                 {
                     "role": "user",
@@ -154,7 +154,7 @@ def extract_khata(image_path: Path, llm: str) -> KhataPage:
                 }
             ],
             "temperature": 0,
-            "max_tokens": 800,
+            "max_tokens": 500,
         },
         timeout=60,
     )
