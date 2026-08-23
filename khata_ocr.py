@@ -143,7 +143,7 @@ def extract_khata(image_path: Path, llm: str) -> KhataPage:
             "Content-Type": "application/json",
         },
         json={
-            "model": "google/gemini-2.0-flash-exp:free",
+            "model": "stealth/ox-alpha",
             "messages": [
                 {
                     "role": "user",
