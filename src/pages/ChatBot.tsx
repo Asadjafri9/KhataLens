@@ -2,7 +2,7 @@ import { Bot, MessageSquareMore, Send, Sparkles, ShieldCheck, TriangleAlert, Loa
 import { DashboardShell } from "@/components/DashboardShell";
 import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabase";
+import { API_BASE } from "@/lib/api";
 import { toast } from "sonner";
 
 interface Message {
@@ -35,7 +35,7 @@ export default function ChatBot() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("http://localhost:8000/api/chat", {
+      const response = await fetch(`${API_BASE}/api/chat`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

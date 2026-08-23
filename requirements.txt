@@ -1,7 +1,10 @@
 fastapi
 uvicorn
 python-multipart
-langchain-google-genai
+requests
 pillow
 python-dotenv
 pydantic
+authlib
+itsdangerous
+psycopg2-binary

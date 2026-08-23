@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { BarChart3, Clock3, DollarSign, TrendingUp, Users } from "lucide-react";
 import { DashboardShell } from "@/components/DashboardShell";
+import { API_BASE } from "@/lib/api";
 import {
   Area, AreaChart, Bar, BarChart, CartesianGrid,
   ResponsiveContainer, Tooltip, XAxis, YAxis, Cell
@@ -25,7 +26,7 @@ export default function Analytics() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("http://localhost:8000/api/analytics")
+    fetch(`${API_BASE}/api/analytics`)
       .then((res) => {
         if (!res.ok) throw new Error("Failed to load analytics");
         return res.json();

@@ -3,6 +3,7 @@ import { CheckCircle2, Upload, ArrowRight, Sparkles, Loader2, AlertCircle } from
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { DashboardShell } from "@/components/DashboardShell";
+import { API_BASE } from "@/lib/api";
 
 export default function ImportSheet() {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -28,7 +29,7 @@ export default function ImportSheet() {
       const formData = new FormData();
       formData.append("file", file);
       
-      const res = await fetch("http://localhost:8000/api/extract", {
+      const res = await fetch(`${API_BASE}/api/extract`, {
         method: "POST",
         body: formData,
       });
@@ -87,7 +88,7 @@ export default function ImportSheet() {
     setIsImporting(true);
     
     try {
-      const res = await fetch("http://localhost:8000/api/import", {
+      const res = await fetch(`${API_BASE}/api/import`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -238,4 +239,4 @@ export default function ImportSheet() {
       </div>
     </DashboardShell>
   );
-}
+}

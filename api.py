@@ -155,14 +155,11 @@ def init_db():
 
 init_db()
 
-# Initialize the LLM once
-api_key = os.environ.get("GOOGLE_API_KEY")
-if not api_key:
-    # Fallback to VITE_GOOGLE_API_KEY if exists
-    api_key = os.environ.get("VITE_GOOGLE_API_KEY")
+# Initialize the LLM once (using OpenRouter for both OCR and chat)
+api_key = os.environ.get("OPENROUTER_API_KEY")
 
 if not api_key:
-    print("WARNING: GOOGLE_API_KEY is not set.")
+    print("WARNING: OPENROUTER_API_KEY is not set.")
     llm = None
 else:
     llm = build_llm(api_key)

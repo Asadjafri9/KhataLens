@@ -20,11 +20,10 @@ import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langchain_core.messages import HumanMessage
 from pydantic import BaseModel, Field
 from typing import Optional
 import json
+import requests
 
 # Load variables from .env file into environment
 load_dotenv()
@@ -105,27 +104,12 @@ def get_images_in_folder(folder: Path) -> list[Path]:
     )
 
 
-def build_llm(api_key: str) -> ChatGoogleGenerativeAI:
-    """
-    Initialise Gemini 2.5 Pro — Google's best multimodal model.
-    Excellent at reading handwritten text, understanding layout,
-    and handling mixed Urdu/English content.
-    """
-    return ChatGoogleGenerativeAI(
-        model="gemini-2.5-flash",   # Best available model for vision/OCR tasks
-        google_api_key=api_key,
-        temperature=0,            # Deterministic output for data extraction
-    )
+def build_llm(api_key: str) -> str:
+    """Return the OpenRouter API key (kept for backward compat)."""
+    return api_key
 
 
-def extract_khata(image_path: Path, llm: ChatGoogleGenerativeAI) -> KhataPage:
-    """Run Gemini on a single khata image and return a structured KhataPage."""
-
-    structured_llm = llm.with_structured_output(KhataPage)
-
-    b64, mime = image_to_base64(image_path)
-
-    prompt = """You are an expert at reading handwritten Pakistani shopkeeper udhaar (credit) notebooks.
+OCR_PROMPT = """You are an expert at reading handwritten Pakistani shopkeeper udhaar (credit) notebooks.
 
 Carefully examine this khata (ledger) page image and extract ALL entries.
 
@@ -141,20 +125,55 @@ RULES:
 6. Do NOT skip any entry, even if handwriting is slightly unclear — use your best judgment.
 7. A 10-11 digit number starting with 03 is always a phone number, never an amount.
 
-Return all entries in the structured format provided."""
+Return ONLY a JSON object with this exact structure:
+{"date": "string or null", "entries": [{"name": "string", "phone": "string or null", "amount": number}]}
 
-    message = HumanMessage(
-        content=[
-            {
-                "type": "image_url",
-                "image_url": {"url": f"data:{mime};base64,{b64}"},
-            },
-            {"type": "text", "text": prompt},
-        ]
+Do not include any other text, markdown, or explanation. Only the JSON."""
+
+
+def extract_khata(image_path: Path, llm: str) -> KhataPage:
+    """Run OCR via OpenRouter on a single khata image and return a structured KhataPage."""
+
+    b64, mime = image_to_base64(image_path)
+
+    response = requests.post(
+        "https://openrouter.ai/api/v1/chat/completions",
+        headers={
+            "Authorization": f"Bearer {llm}",
+            "Content-Type": "application/json",
+        },
+        json={
+            "model": "google/gemini-2.5-flash-lite",
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "image_url", "image_url": {"url": f"data:{mime};base64,{b64}"}},
+                        {"type": "text", "text": OCR_PROMPT},
+                    ],
+                }
+            ],
+            "temperature": 0,
+            "max_tokens": 2000,
+        },
+        timeout=60,
     )
 
-    result: KhataPage = structured_llm.invoke([message])
-    return result
+    if response.status_code != 200:
+        raise Exception(f"OpenRouter API error: {response.text}")
+
+    content = response.json()["choices"][0]["message"]["content"]
+
+    # Strip markdown code fences if present
+    content = content.strip()
+    if content.startswith("```"):
+        content = content.split("\n", 1)[1] if "\n" in content else content[3:]
+    if content.endswith("```"):
+        content = content[:-3]
+    content = content.strip()
+
+    data = json.loads(content)
+    return KhataPage(**data)
 
 
 # ── Display ───────────────────────────────────────────────────────────────────
@@ -218,10 +237,10 @@ def main():
     args = parser.parse_args()
 
     # Validate API key
-    api_key = os.environ.get("GOOGLE_API_KEY", "")
+    api_key = os.environ.get("OPENROUTER_API_KEY", "")
     if not api_key:
-        print("ERROR: GOOGLE_API_KEY not found. Add it to your .env file:")
-        print("  GOOGLE_API_KEY=your_api_key_here")
+        print("ERROR: OPENROUTER_API_KEY not found. Add it to your .env file:")
+        print("  OPENROUTER_API_KEY=your_openrouter_api_key_here")
         sys.exit(1)
 
     # Validate folder
@@ -235,7 +254,7 @@ def main():
         print(f"ERROR: No supported images (jpg/png/webp) found in: {folder}")
         sys.exit(1)
 
-    print(f"\nFound {len(images)} image(s) in '{folder}'. Processing with Gemini 2.5 flash...\n")
+    print(f"\nFound {len(images)} image(s) in '{folder}'. Processing via OpenRouter...\n")
 
     # Build LLM once -- reused for all images
     llm = build_llm(api_key)

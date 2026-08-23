@@ -1,23 +1,17 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import { supabase } from '@/lib/supabase';
-import type { User, Session } from '@supabase/supabase-js';
+import { API_BASE } from '@/lib/api';
 
-interface Shopkeeper {
+interface AuthUser {
   id: string;
-  auth_id: string;
   name: string;
   email: string;
-  avatar_url: string | null;
-  shop_name: string | null;
-  created_at: string;
+  avatar: string;
 }
 
 interface AuthContextType {
-  user: User | null;
-  session: Session | null;
-  shopkeeper: Shopkeeper | null;
+  user: AuthUser | null;
   loading: boolean;
-  signInWithGoogle: () => Promise<void>;
+  signInWithGoogle: () => void;
   signOut: () => Promise<void>;
 }
 
@@ -30,50 +24,37 @@ export const useAuth = () => {
 };
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [shopkeeper, setShopkeeper] = useState<Shopkeeper | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
-    return () => subscription.unsubscribe();
+    fetch(`${API_BASE}/api/auth/me`, { credentials: 'include' })
+      .then(async (res) => {
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
-  const signInWithGoogle = async () => {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: `${window.location.origin}/customer`,
-      },
-    });
-    if (error) console.error('Google sign-in error:', error);
+  const signInWithGoogle = () => {
+    window.location.href = `${API_BASE}/api/auth/google`;
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    try {
+      await fetch(`${API_BASE}/api/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch {}
     setUser(null);
-    setSession(null);
-    setShopkeeper(null);
   };
 
   return (
-    <AuthContext.Provider value={{ user, session, shopkeeper, loading, signInWithGoogle, signOut }}>
+    <AuthContext.Provider value={{ user, loading, signInWithGoogle, signOut }}>
       {children}
     </AuthContext.Provider>
   );

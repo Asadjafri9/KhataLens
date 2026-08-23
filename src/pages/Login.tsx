@@ -2,7 +2,7 @@ import { ArrowLeft, ArrowRight, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import BrandedRubiksCube from "@/components/BrandedRubiksCube";
-import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
 interface LoginProps {
@@ -30,21 +30,11 @@ export default function Login({ cubeShouldAssemble = true }: LoginProps) {
     }, 500);
   };
 
-  const handleGoogleLogin = async () => {
-    try {
-      setIsLoading(true);
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo: window.location.origin + '/customer'
-        }
-      });
-      if (error) throw error;
-    } catch (error: any) {
-      toast.error(error.message || "Failed to initiate Google login");
-    } finally {
-      setIsLoading(false);
-    }
+  const { signInWithGoogle } = useAuth();
+
+  const handleGoogleLogin = () => {
+    setIsLoading(true);
+    signInWithGoogle();
   };
 
   return (
