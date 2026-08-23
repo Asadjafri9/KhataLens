@@ -1,19 +1,29 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, UploadFile, File, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, RedirectResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
+from starlette.middleware.sessions import SessionMiddleware
 import uvicorn
 from pathlib import Path
 import tempfile
 import os
 import uuid
 import sqlite3
+import secrets
 from datetime import datetime
 from khata_ocr import build_llm, extract_khata
 from dotenv import load_dotenv
+from authlib.integrations.starlette_client import OAuth
 
 load_dotenv() # Load from .env
 
 app = FastAPI(title="KhataLens API")
+
+# Session middleware (required for OAuth state)
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=os.getenv("SESSION_SECRET", secrets.token_hex(32)),
+)
 
 # CORS configuration
 app.add_middleware(
@@ -24,42 +34,122 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# --- Google OAuth Setup ---
+oauth = OAuth()
+google_client_id = os.getenv("GOOGLE_CLIENT_ID")
+google_client_secret = os.getenv("GOOGLE_CLIENT_SECRET")
+
+# Determine redirect URI based on environment
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
+GOOGLE_REDIRECT_URI = f"{BACKEND_URL}/api/auth/google/callback"
+
+if google_client_id and google_client_secret:
+    oauth.register(
+        name="google",
+        client_id=google_client_id,
+        client_secret=google_client_secret,
+        server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+        client_kwargs={"scope": "openid email profile"},
+    )
+
+
 # --- Database Setup ---
-DB_PATH = "khata.db"
+DATABASE_URL = os.getenv("DATABASE_URL")
+USE_POSTGRES = bool(DATABASE_URL)
+
+if USE_POSTGRES:
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+
+def _adapt_sql(sql):
+    if USE_POSTGRES:
+        return sql.replace("?", "%s")
+    return sql
+
+class DBConnection:
+    def __init__(self, conn):
+        self._conn = conn
+
+    def execute(self, sql, params=None):
+        sql = _adapt_sql(sql)
+        if USE_POSTGRES:
+            cur = self._conn.cursor()
+            cur.execute(sql, params or ())
+            return cur
+        else:
+            if params:
+                return self._conn.execute(sql, params)
+            return self._conn.execute(sql)
+
+    def cursor(self):
+        return self._conn.cursor()
+
+    def commit(self):
+        self._conn.commit()
+
+    def rollback(self):
+        self._conn.rollback()
+
+    def close(self):
+        self._conn.close()
 
 def get_db():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+    if USE_POSTGRES:
+        conn = psycopg2.connect(DATABASE_URL)
+        conn.cursor_factory = RealDictCursor
+        return DBConnection(conn)
+    else:
+        conn = sqlite3.connect("khata.db")
+        conn.row_factory = sqlite3.Row
+        return DBConnection(conn)
 
 def init_db():
     conn = get_db()
     cursor = conn.cursor()
-    
-    # Customers table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS customers (
-            id TEXT PRIMARY KEY,
-            name TEXT NOT NULL,
-            phone TEXT UNIQUE,
-            balance REAL DEFAULT 0,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-    
-    # Transactions table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS transactions (
-            id TEXT PRIMARY KEY,
-            customer_id TEXT NOT NULL,
-            type TEXT NOT NULL,
-            amount REAL NOT NULL,
-            description TEXT,
-            date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (customer_id) REFERENCES customers (id)
-        )
-    ''')
-    
+
+    if USE_POSTGRES:
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS customers (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                phone TEXT UNIQUE,
+                balance REAL DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS transactions (
+                id TEXT PRIMARY KEY,
+                customer_id TEXT NOT NULL,
+                type TEXT NOT NULL,
+                amount REAL NOT NULL,
+                description TEXT,
+                date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (customer_id) REFERENCES customers (id)
+            )
+        ''')
+    else:
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS customers (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                phone TEXT UNIQUE,
+                balance REAL DEFAULT 0,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        ''')
+        cursor.execute('''
+            CREATE TABLE IF NOT EXISTS transactions (
+                id TEXT PRIMARY KEY,
+                customer_id TEXT NOT NULL,
+                type TEXT NOT NULL,
+                amount REAL NOT NULL,
+                description TEXT,
+                date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (customer_id) REFERENCES customers (id)
+            )
+        ''')
+
     conn.commit()
     conn.close()
 
@@ -79,7 +169,7 @@ else:
 
 @app.get("/health")
 async def health():
-    return {"status": "healthy", "database": "sqlite"}
+    return {"status": "healthy", "database": "postgres" if USE_POSTGRES else "sqlite"}
 
 # --- OCR Endpoints ---
 
@@ -118,8 +208,10 @@ def get_customers():
 @app.get("/api/stats")
 def get_stats():
     conn = get_db()
-    total_balance = conn.execute("SELECT SUM(balance) FROM customers").fetchone()[0] or 0
-    active_customers = conn.execute("SELECT COUNT(*) FROM customers").fetchone()[0] or 0
+    total_balance = conn.execute("SELECT COALESCE(SUM(balance), 0) AS val FROM customers").fetchone()
+    total_balance = total_balance["val"] if USE_POSTGRES else total_balance[0]
+    active_customers = conn.execute("SELECT COUNT(*) AS val FROM customers").fetchone()
+    active_customers = active_customers["val"] if USE_POSTGRES else active_customers[0]
     conn.close()
     return {
         "totalBalance": total_balance,
@@ -142,20 +234,20 @@ async def import_entries(data: dict):
             amount = float(entry.get("amount", 0))
             
             # Check if customer exists by name and phone
-            cursor.execute("SELECT id, balance FROM customers WHERE phone = ?", (phone,))
+            cursor.execute(_adapt_sql("SELECT id, balance FROM customers WHERE phone = ?"), (phone,))
             existing = cursor.fetchone()
             
             if existing:
                 customer_id = existing["id"]
                 new_balance = existing["balance"] + amount
-                cursor.execute("UPDATE customers SET balance = ? WHERE id = ?", (new_balance, customer_id))
+                cursor.execute(_adapt_sql("UPDATE customers SET balance = ? WHERE id = ?"), (new_balance, customer_id))
             else:
                 customer_id = str(uuid.uuid4())
-                cursor.execute("INSERT INTO customers (id, name, phone, balance) VALUES (?, ?, ?, ?)",
+                cursor.execute(_adapt_sql("INSERT INTO customers (id, name, phone, balance) VALUES (?, ?, ?, ?)"),
                              (customer_id, name, phone, amount))
             
             # Add transaction
-            cursor.execute("INSERT INTO transactions (id, customer_id, type, amount, description, date) VALUES (?, ?, ?, ?, ?, ?)",
+            cursor.execute(_adapt_sql("INSERT INTO transactions (id, customer_id, type, amount, description, date) VALUES (?, ?, ?, ?, ?, ?)"),
                          (str(uuid.uuid4()), customer_id, "credit", amount, "Imported via OCR", import_date))
         
         conn.commit()
@@ -169,7 +261,7 @@ async def import_entries(data: dict):
 @app.get("/api/transactions/{customer_id}")
 def get_transactions(customer_id: str):
     conn = get_db()
-    txs = conn.execute("SELECT * FROM transactions WHERE customer_id = ? ORDER BY date DESC", (customer_id,)).fetchall()
+    txs = conn.execute(_adapt_sql("SELECT * FROM transactions WHERE customer_id = ? ORDER BY date DESC"), (customer_id,)).fetchall()
     conn.close()
     return [dict(t) for t in txs]
 
@@ -187,7 +279,7 @@ async def record_payment(data: dict):
             raise HTTPException(status_code=400, detail="Payment amount must be greater than 0")
         
         # Get current balance
-        customer = cursor.execute("SELECT id, name, balance FROM customers WHERE id = ?", (customer_id,)).fetchone()
+        customer = cursor.execute(_adapt_sql("SELECT id, name, balance FROM customers WHERE id = ?"), (customer_id,)).fetchone()
         if not customer:
             raise HTTPException(status_code=404, detail="Customer not found")
         
@@ -196,11 +288,11 @@ async def record_payment(data: dict):
         actual_paid = current_balance - new_balance      # Actual deducted (cap at balance)
         
         # Update balance
-        cursor.execute("UPDATE customers SET balance = ? WHERE id = ?", (new_balance, customer_id))
+        cursor.execute(_adapt_sql("UPDATE customers SET balance = ? WHERE id = ?"), (new_balance, customer_id))
         
         # Log the payment transaction
         cursor.execute(
-            "INSERT INTO transactions (id, customer_id, type, amount, description, date) VALUES (?, ?, ?, ?, ?, ?)",
+            _adapt_sql("INSERT INTO transactions (id, customer_id, type, amount, description, date) VALUES (?, ?, ?, ?, ?, ?)"),
             (str(uuid.uuid4()), customer_id, "payment", actual_paid, note, datetime.now().isoformat())
         )
         
@@ -235,23 +327,23 @@ async def update_customer(customer_id: str, data: dict):
         updates = []
         values = []
         if name is not None:
-            updates.append("name = ?")
+            updates.append(_adapt_sql("name = ?"))
             values.append(name)
         if phone is not None:
-            updates.append("phone = ?")
+            updates.append(_adapt_sql("phone = ?"))
             values.append(phone)
         if balance is not None:
-            updates.append("balance = ?")
+            updates.append(_adapt_sql("balance = ?"))
             values.append(float(balance))
         
         if not updates:
             raise HTTPException(status_code=400, detail="No fields to update")
         
         values.append(customer_id)
-        conn.execute(f"UPDATE customers SET {', '.join(updates)} WHERE id = ?", values)
+        conn.execute(_adapt_sql(f"UPDATE customers SET {', '.join(updates)} WHERE id = ?"), values)
         conn.commit()
         
-        updated = conn.execute("SELECT * FROM customers WHERE id = ?", (customer_id,)).fetchone()
+        updated = conn.execute(_adapt_sql("SELECT * FROM customers WHERE id = ?"), (customer_id,)).fetchone()
         return dict(updated)
     except HTTPException:
         raise
@@ -266,35 +358,52 @@ def get_analytics():
     conn = get_db()
     try:
         # Total open balance (sum of what customers still owe)
-        open_balance = conn.execute("SELECT COALESCE(SUM(balance), 0) FROM customers").fetchone()[0]
-        
+        row = conn.execute("SELECT COALESCE(SUM(balance), 0) AS val FROM customers").fetchone()
+        open_balance = row["val"] if USE_POSTGRES else row[0]
+
         # Total ever imported (sum of all credit transactions = total amount given on credit)
-        total_credit = conn.execute("SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE type = 'credit'").fetchone()[0]
-        
+        row = conn.execute("SELECT COALESCE(SUM(amount), 0) AS val FROM transactions WHERE type = 'credit'").fetchone()
+        total_credit = row["val"] if USE_POSTGRES else row[0]
+
         # Total recovered = total credit - open balance
         total_recovered = total_credit - open_balance
-        
+
         # Customer count
-        customer_count = conn.execute("SELECT COUNT(*) FROM customers").fetchone()[0]
-        
+        row = conn.execute("SELECT COUNT(*) AS val FROM customers").fetchone()
+        customer_count = row["val"] if USE_POSTGRES else row[0]
+
         # Customers with balance > 0 (overdue/pending)
-        pending_count = conn.execute("SELECT COUNT(*) FROM customers WHERE balance > 0").fetchone()[0]
+        row = conn.execute("SELECT COUNT(*) AS val FROM customers WHERE balance > 0").fetchone()
+        pending_count = row["val"] if USE_POSTGRES else row[0]
         
         # Customers with balance = 0 (fully paid)
         paid_count = customer_count - pending_count
         
         # Monthly data: group transactions by month
-        monthly_rows = conn.execute("""
-            SELECT 
-                strftime('%Y-%m', date) as month_key,
-                strftime('%b', date) as month_label,
-                SUM(amount) as total
-            FROM transactions
-            WHERE type = 'credit'
-            GROUP BY month_key
-            ORDER BY month_key ASC
-            LIMIT 6
-        """).fetchall()
+        if USE_POSTGRES:
+            monthly_rows = conn.execute("""
+                SELECT
+                    to_char(date, 'YYYY-MM') as month_key,
+                    to_char(date, 'Mon') as month_label,
+                    SUM(amount) as total
+                FROM transactions
+                WHERE type = 'credit'
+                GROUP BY month_key, month_label
+                ORDER BY month_key ASC
+                LIMIT 6
+            """).fetchall()
+        else:
+            monthly_rows = conn.execute("""
+                SELECT
+                    strftime('%Y-%m', date) as month_key,
+                    strftime('%b', date) as month_label,
+                    SUM(amount) as total
+                FROM transactions
+                WHERE type = 'credit'
+                GROUP BY month_key
+                ORDER BY month_key ASC
+                LIMIT 6
+            """).fetchall()
         
         monthly_data = []
         for row in monthly_rows:
@@ -338,13 +447,13 @@ def delete_customer(customer_id: str):
     conn = get_db()
     try:
         # Check customer exists
-        existing = conn.execute("SELECT id FROM customers WHERE id = ?", (customer_id,)).fetchone()
+        existing = conn.execute(_adapt_sql("SELECT id FROM customers WHERE id = ?"), (customer_id,)).fetchone()
         if not existing:
             raise HTTPException(status_code=404, detail="Customer not found")
         
         # Delete transactions first (foreign key), then customer
-        conn.execute("DELETE FROM transactions WHERE customer_id = ?", (customer_id,))
-        conn.execute("DELETE FROM customers WHERE id = ?", (customer_id,))
+        conn.execute(_adapt_sql("DELETE FROM transactions WHERE customer_id = ?"), (customer_id,))
+        conn.execute(_adapt_sql("DELETE FROM customers WHERE id = ?"), (customer_id,))
         conn.commit()
         return {"status": "success", "message": "Customer deleted"}
     except HTTPException:
@@ -356,6 +465,52 @@ def delete_customer(customer_id: str):
         conn.close()
 
 import requests
+
+# --- Google Auth Endpoints ---
+
+@app.get("/api/auth/google")
+async def auth_google(request: Request):
+    """Redirects user to Google's OAuth consent screen."""
+    if not google_client_id:
+        raise HTTPException(status_code=500, detail="GOOGLE_CLIENT_ID not configured")
+    redirect_uri = GOOGLE_REDIRECT_URI
+    return await oauth.google.authorize_redirect(request, redirect_uri)
+
+@app.get("/api/auth/google/callback")
+async def auth_google_callback(request: Request):
+    """Handles the OAuth callback from Google. Stores user in session and DB."""
+    token = await oauth.google.authorize_access_token(request)
+    user_info = token.get("userinfo")
+    if not user_info:
+        # Fallback: fetch user info from token
+        resp = await oauth.google.get("https://www.googleapis.com/oauth2/v1/userinfo", token=token)
+        user_info = resp.json()
+
+    # Store user in session
+    request.session["user"] = {
+        "id": user_info["sub"],
+        "name": user_info.get("name", ""),
+        "email": user_info.get("email", ""),
+        "avatar": user_info.get("picture", ""),
+    }
+
+    # Redirect to frontend
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:8080")
+    return RedirectResponse(url=f"{frontend_url}/customer")
+
+@app.get("/api/auth/me")
+async def auth_me(request: Request):
+    """Returns the current logged-in user from session."""
+    user = request.session.get("user")
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    return user
+
+@app.post("/api/auth/logout")
+async def auth_logout(request: Request):
+    """Logs out the current user."""
+    request.session.clear()
+    return {"status": "ok"}
 
 @app.post("/api/chat")
 def chat_bot(data: dict):
@@ -420,9 +575,10 @@ INSTRUCTIONS:
                 "Content-Type": "application/json"
             },
             json={
-                "model": "google/gemini-2.0-flash-001",
+                "model": "google/gemini-2.5-flash-lite",
                 "messages": messages,
-                "temperature": 0.7
+                "temperature": 0.7,
+                "max_tokens": 800
             }
         )
         
@@ -436,5 +592,21 @@ INSTRUCTIONS:
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+# --- Serve Frontend (Production) ---
+DIST_DIR = Path(__file__).parent / "dist"
+if DIST_DIR.exists():
+    app.mount("/assets", StaticFiles(directory=DIST_DIR / "assets"), name="assets")
+
+    @app.get("/{full_path:path}")
+    async def serve_spa(full_path: str):
+        # Don't intercept API routes
+        if full_path.startswith("api/"):
+            raise HTTPException(status_code=404)
+        file_path = DIST_DIR / full_path
+        if file_path.is_file():
+            return FileResponse(file_path)
+        return FileResponse(DIST_DIR / "index.html")
+
 if __name__ == "__main__":
-    uvicorn.run("api:app", host="0.0.0.0", port=8000, reload=True)
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run("api:app", host="0.0.0.0", port=port, reload=False)
