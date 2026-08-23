@@ -154,7 +154,7 @@ def extract_khata(image_path: Path, llm: str) -> KhataPage:
                 }
             ],
             "temperature": 0,
-            "max_tokens": 2000,
+            "max_tokens": 800,
         },
         timeout=60,
     )
